@@ -41,7 +41,7 @@ private:
 	void REPEAT_STATEMENT(); //<ÖØ¸´Óï¾ä> :: = repeat<Óï¾ä>{ ; <Óï¾ä> }until<Ìõ¼þ>
 
 
-	bool confirmType(Word::WordType expectedType);
-	bool confirmValue(std::string expectedVal);
+	bool confirm(Word::WordType expectedType);
+	bool confirmName(std::string expectedVal);
 };
 

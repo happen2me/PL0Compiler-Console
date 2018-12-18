@@ -19,7 +19,7 @@ WordAnalyzer::WordAnalyzer(std::string filename) :
 
 char WordAnalyzer::getchar()
 {
-	if (readPtr < buffer.size())
+	if (readPtr < (int)(buffer.size()))
 	{
 		ch = buffer[readPtr];
 		++readPtr;
@@ -141,9 +141,13 @@ void WordAnalyzer::retract()
 
 Word::WordType WordAnalyzer::reserver()
 {
-	for (size_t i = 0; i < reservedWords.size(); i++) {
+	/*for (size_t i = 0; i < reservedWords.size(); i++) {
 		if (token == reservedWords[i])
 			return Word::RESERVED;
+	}*/
+	std::map<std::string, Word::WordType>::iterator it = reservedWordMap.find(token);
+	if (it != reservedWordMap.end()) {
+		return it->second;
 	}
 	return Word::IDENTIFIER;
 }
@@ -160,7 +164,7 @@ void WordAnalyzer::error(std::string message)
 
 void WordAnalyzer::analyze()
 {
-	while (readPtr < buffer.length()) {
+	while (readPtr < (int)buffer.length()) {
 		try
 		{
 			Word word = identifyWord();
@@ -184,6 +188,26 @@ std::vector<Word> WordAnalyzer::getResult()
 
 WordAnalyzer::~WordAnalyzer()
 {
+}
+
+void WordAnalyzer::printResult() {
+	std::cout.width(12);
+	std::cout << std::left << "Name";
+	std::cout.width(15);
+	std::cout << std::left << "Type";
+	std::cout << std::left << "Value" << std::endl;
+	for (int i = 0; i < (int)results.size(); i++) {
+		std::cout.width(12);
+		std::cout << std::left << results[i].name;
+		std::cout.width(15);
+		std::cout << Word::translator[results[i].type];
+		if (results[i].type == Word::CONST) {
+			std::cout << std::left << results[i].val << std::endl;
+		}
+		else {
+			std::cout << std::left << "-" << std::endl;
+		}
+	}
 }
 
 void WordAnalyzer::readFile(std::string filename)
@@ -241,11 +265,13 @@ Word WordAnalyzer::identifyWord()
 			return Word();
 		}
 		retract();
-		if (isFloat) {
-			return Word(lineCounter, token, Word::CONST, token);
-		}
 
 		int numVal = transNum();
+
+		// TODO float
+		if (isFloat) {
+			return Word(lineCounter, token, Word::CONST, numVal);
+		}
 		return Word(lineCounter, token, Word::CONST, numVal);
 	}
 	else if (isLetter())  //Start with letter
@@ -264,53 +290,53 @@ Word WordAnalyzer::identifyWord()
 		if (isEqual())
 		{
 			catToken();
-			symbol = Word::BINARY_OPERATOR; // :=
+			symbol = Word::OP_ASSIGN; // :=
 		}
 		else
 		{
 			retract();
-			symbol = Word::SEPERATOR; // :
+			symbol = Word::SP_COLON; // :
 		}
 	}
 	else if (isEqual())
 	{
 		catToken();
-		symbol = Word::BINARY_OPERATOR;	// =
+		symbol = Word::OP_EQUAL;	// =
 	}
 	else if (isPlus())
 	{
 		catToken();
-		symbol = Word::BINARY_OPERATOR;	// +
+		symbol = Word::OP_PLUS;	// +
 	}
 	else if (isMinus())
 	{
 		catToken();
-		symbol = Word::BINARY_OPERATOR;	// -
+		symbol = Word::OP_MINUS;	// -
 	}
 	else if (isStar())
 	{
 		catToken();
-		symbol = Word::BINARY_OPERATOR;	// *
+		symbol = Word::OP_MULTIPLY;	// *
 	}
 	else if (isLpar())
 	{
 		catToken();
-		symbol = Word::SEPERATOR;		// (
+		symbol = Word::SP_LEFT_PAR;		// (
 	}
 	else if (isRpar())
 	{
 		catToken();
-		symbol = Word::SEPERATOR;		// )
+		symbol = Word::SP_RIGHT_PAR;		// )
 	}
 	else if (isComma())
 	{
 		catToken();
-		symbol = Word::SEPERATOR;	// ,
+		symbol = Word::SP_COMMA;	// ,
 	}
 	else if (isSemi())
 	{
 		catToken();
-		symbol = Word::SEPERATOR;	// ;
+		symbol = Word::SP_SEMICOLON;	// ;
 	}
 	else if (ch == '<')
 	{
@@ -319,17 +345,17 @@ Word WordAnalyzer::identifyWord()
 		if (ch == '=')
 		{
 			catToken();
-			symbol = Word::BINARY_OPERATOR;	// <=
+			symbol = Word::OP_LESS_EQUAL;	// <=
 		}
 		else if (ch == '>')
 		{
 			catToken();
-			symbol = Word::BINARY_OPERATOR; // <>
+			symbol = Word::OP_NOT_EQUAL; // <>
 		}
 		else
 		{
 			retract();
-			symbol = Word::BINARY_OPERATOR; //<
+			symbol = Word::OP_LESS; //<
 		}
 	}
 	else if (ch == '>')
@@ -339,12 +365,12 @@ Word WordAnalyzer::identifyWord()
 		if (ch == '=')
 		{
 			catToken();
-			symbol = Word::BINARY_OPERATOR; // >=
+			symbol = Word::OP_ABOVE_EQUAL; // >=
 		}
 		else
 		{
 			retract();
-			symbol = Word::BINARY_OPERATOR; // >
+			symbol = Word::OP_ABOVE; // >
 		}
 	}
 	else if (isDivide())
@@ -366,7 +392,7 @@ Word WordAnalyzer::identifyWord()
 					getchar();
 					if (isDivide())
 					{
-						return Word::CreateCommentWord(); //processed comments
+						return Word::CreateEmptyWord(); //processed comments
 					}
 				} while (isStar());
 			} while (!isStar());
@@ -378,13 +404,13 @@ Word WordAnalyzer::identifyWord()
 		else
 		{
 			retract();
-			symbol = Word::BINARY_OPERATOR;	//"/"
+			symbol = Word::OP_DIVIDE;	//"/"
 		}
 	}
 	else if (isDot())
 	{
 		catToken();
-		symbol = Word::BINARY_OPERATOR;
+		symbol = Word::SP_DOT; // .
 
 	}
 	else
@@ -394,4 +420,5 @@ Word WordAnalyzer::identifyWord()
 
 	return Word(lineCounter, token, symbol);
 }
+
 

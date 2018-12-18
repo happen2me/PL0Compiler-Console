@@ -52,12 +52,12 @@ bool GrammarAnalyzer::read()
 			nextWord = wordStack.top();
 		}
 		else {
-			nextWord = Word::CreateCommentWord();
+			nextWord = Word::CreateEmptyWord();
 		}
 		return true;
 	}
 	else {
-		cur = Word::CreateCommentWord();
+		cur = Word::CreateEmptyWord();
 		return false;
 	}
 		
@@ -74,7 +74,8 @@ void GrammarAnalyzer::MAIN_PROC()
 {
 	try {
 		SUB_PROC();
-		confirmValue(".");
+		//confirmName(".");
+		confirm(Word::SP_DOT);
 	}
 	catch (std::exception e) {
 		std::cout << e.what() << std::endl;
@@ -92,13 +93,13 @@ void GrammarAnalyzer::MAIN_PROC()
 //<分程序>::=[<常量说明部分>][<变量说明部分>][<过程说明部分>]<语句>
 void GrammarAnalyzer::SUB_PROC()
 {
-	if (cur.name == KW_CONST) {
+	if (cur.type == Word::KW_CONST) {
 		CONST_DECLARATION();
 	}
-	if (cur.name == KW_VAR) {
+	if (cur.type == Word::KW_VAR) {
 		VAR_DECLARATION();
 	}
-	if (cur.name == KW_PROCEDURE) {
+	if (cur.type == Word::KW_PROCEDURE) {
 		PROCEDURE_DECLARATION();
 	}
 	STATEMENT();
@@ -110,26 +111,26 @@ void GrammarAnalyzer::STATEMENT()
 	if (cur.type == Word::IDENTIFIER) {
 		ASSIGNMENT_STATEMENT();
 	}
-	else if (cur.type == Word::RESERVED) {
-		if (cur.name == KW_IF) {
+	else if (cur.isReserved()) {
+		if (cur.type == Word::KW_IF) {
 			CONDITIONAL_STATEMENT();
 		}
-		else if (cur.name == KW_WHILE) {
+		else if (cur.type == Word::KW_WHILE) {
 			WHILE_STATEMENT();
 		}
-		else if (cur.name == KW_CALL) {
+		else if (cur.type == Word::KW_CALL) {
 			CALL_STATEMENT();
 		}
-		else if (cur.name == KW_BEGIN) {
+		else if (cur.type == Word::KW_BEGIN) {
 			COMPOUND_STATEMENT();
 		}
-		else if (cur.name == KW_READ) {
+		else if (cur.type == Word::KW_READ) {
 			READ_STATEMENT();
 		}
-		else if (cur.name == KW_WRITE) {
+		else if (cur.type == Word::KW_WRITE) {
 			WRITE_STATEMENT();
 		}
-		else if (cur.name == KW_REPEAT) {
+		else if (cur.type == Word::KW_REPEAT) {
 			REPEAT_STATEMENT();
 		}
 	}
@@ -153,14 +154,17 @@ void GrammarAnalyzer::EXPRESSION()
 //<条件>::=<表达式><关系运算符><表达式> | odd<表达式>
 void GrammarAnalyzer::CONDITION()
 {
-	if (cur.name == KW_ODD) {
+	if (cur.type == Word::KW_ODD) {
 		read();
 		EXPRESSION();
 	}
 	else {
 		EXPRESSION();
 		//TODO shori
-		confirmType(Word::BINARY_OPERATOR);
+		//confirmType(Word::BINARY_OPERATOR);
+		if (!cur.isOperator()) {
+			Error::raiseUnexpectedError(cur.line, cur.name);
+		}
 		read();
 		EXPRESSION();
 	}
@@ -180,7 +184,8 @@ void GrammarAnalyzer::FACTOR()
 	else if (cur.name == "(") {
 		read();
 		EXPRESSION();
-		confirmValue(")");
+		//confirmName(")");
+		confirm(Word::SP_RIGHT_PAR);
 		read();
 	}
 	else {
@@ -202,7 +207,7 @@ void GrammarAnalyzer::TERM()
 //<常量说明部分>::=const <常量定义>{,<常量定义>}
 void GrammarAnalyzer::CONST_DECLARATION()
 {
-	if (cur.name == KW_CONST) {
+	if (cur.type == Word::KW_CONST) {
 		read();
 		CONST_DEFINITION();
 		while (cur.name == ",")
@@ -211,7 +216,8 @@ void GrammarAnalyzer::CONST_DECLARATION()
 			CONST_DEFINITION();
 		}
 
-		confirmValue(";");
+		//confirm(Word::SP_SEMICOLON);
+		confirm(Word::SP_SEMICOLON);
 		read();
 	}
 	else {
@@ -223,43 +229,44 @@ void GrammarAnalyzer::CONST_DECLARATION()
 //<常量定义>::=<标识符>=<无符号整数>
 void GrammarAnalyzer::CONST_DEFINITION()
 {
-	confirmType(Word::IDENTIFIER);
+	confirm(Word::IDENTIFIER);
 	read();
-	confirmValue("=");
+	//confirmName("=");
+	confirm(Word::OP_EQUAL);
 	read();
-	confirmType(Word::CONST);
+	confirm(Word::CONST);
 	read();
 }
 //<变量说明部分>::=var<标识符>{,<标识符>}
 void GrammarAnalyzer::VAR_DECLARATION()
 {
-	confirmValue(KW_VAR);
+	confirm(Word::KW_VAR);
 	read();
-	confirmType(Word::IDENTIFIER);
+	confirm(Word::IDENTIFIER);
 	read();
 	while (cur.name == ",")
 	{
 		read();
-		confirmType(Word::IDENTIFIER);
+		confirm(Word::IDENTIFIER);
 		read();
 	}
-	confirmValue(";");
+	confirm(Word::SP_SEMICOLON);
 	read();
 }
 
 //<过程说明部分> ::= procedure<标识符>;<分程序>;{<过程说明部分>}
 void GrammarAnalyzer::PROCEDURE_DECLARATION()
 {
-	confirmValue(KW_PROCEDURE);
+	confirm(Word::KW_PROCEDURE);
 	read();
-	confirmType(Word::IDENTIFIER);
+	confirm(Word::IDENTIFIER);
 	read();
-	confirmValue(";");
+	confirm(Word::SP_SEMICOLON);
 	read();
 	SUB_PROC();
-	confirmValue(";");
+	confirm(Word::SP_SEMICOLON);
 	read();
-	while (!cur.isEmptyWord() && cur.name == KW_PROCEDURE)
+	while (!cur.isEmptyWord() && cur.type == Word::KW_PROCEDURE)
 	{
 		PROCEDURE_DECLARATION();
 	}
@@ -268,9 +275,9 @@ void GrammarAnalyzer::PROCEDURE_DECLARATION()
 // <赋值语句>::=<标识符>:=<表达式>
 void GrammarAnalyzer::ASSIGNMENT_STATEMENT()
 {
-	confirmType(Word::IDENTIFIER);
+	confirm(Word::IDENTIFIER);
 	read();
-	confirmValue(":=");
+	confirmName(":=");
 	read();
 	EXPRESSION();
 }
@@ -278,7 +285,7 @@ void GrammarAnalyzer::ASSIGNMENT_STATEMENT()
 // <复合语句> :: = begin<语句>{ ; <语句> }end
 void GrammarAnalyzer::COMPOUND_STATEMENT()
 {
-	confirmValue(KW_BEGIN);
+	confirm(Word::KW_BEGIN);
 	read();
 	STATEMENT();
 	while (cur.name == ";")
@@ -286,20 +293,20 @@ void GrammarAnalyzer::COMPOUND_STATEMENT()
 		read();
 		STATEMENT();
 	}
-	confirmValue(KW_END);
+	confirm(Word::KW_END);
 	read();
 }
 
 // <条件语句> ::= if<条件>then<语句>[else<语句>]
 void GrammarAnalyzer::CONDITIONAL_STATEMENT()
 {
-	confirmValue(KW_IF);
+	confirm(Word::KW_IF);
 	read();
 	CONDITION();
-	confirmValue(KW_THEN);
+	confirm(Word::KW_THEN);
 	read();
 	STATEMENT();
-	if (!cur.isEmptyWord() && cur.name == KW_ELSE) {
+	if (!cur.isEmptyWord() && cur.type == Word::KW_ELSE) {
 		read();
 		STATEMENT();
 	}
@@ -307,85 +314,85 @@ void GrammarAnalyzer::CONDITIONAL_STATEMENT()
 //<当循环语句>::=while<条件>do<语句>
 void GrammarAnalyzer::WHILE_STATEMENT()
 {
-	confirmValue(KW_WHILE);
+	confirm(Word::KW_WHILE);
 	read();
 	CONDITION();
-	confirmValue(KW_DO);
+	confirm(Word::KW_DO);
 	read();
 	STATEMENT();
 }
 // <过程调用语句>::=call<标识符>
 void GrammarAnalyzer::CALL_STATEMENT()
 {
-	confirmValue(KW_CALL);
+	confirm(Word::KW_CALL);
 	read();
-	confirmType(Word::IDENTIFIER);
+	confirm(Word::IDENTIFIER);
 	read();
 }
 
 //<读语句>::=read'('<标识符>{,<标识符>}')'
 void GrammarAnalyzer::READ_STATEMENT()
 {
-	confirmValue(KW_READ);
+	confirm(Word::KW_READ);
 	read();
-	confirmValue("(");
+	confirmName("(");
 	read();
-	confirmType(Word::IDENTIFIER);
+	confirm(Word::IDENTIFIER);
 	read();
 	while (cur.name == ",") {
 		read();
-		confirmType(Word::IDENTIFIER);
+		confirm(Word::IDENTIFIER);
 		read();
 	}
-	confirmValue(")");
+	confirmName(")");
 	read();
 }
 
 // <写语句>::=write '('<表达式>{,<表达式>}')'
 void GrammarAnalyzer::WRITE_STATEMENT()
 {
-	confirmValue(KW_WRITE);
+	confirm(Word::KW_WRITE);
 	read();
-	confirmValue("(");
+	confirmName("(");
 	read();
 	EXPRESSION();
 	while (cur.name == ",") {
 		read();
 		EXPRESSION();
 	}
-	confirmValue(")");
+	confirmName(")");
 	read();
 }
 
 //<重复语句> :: = repeat<语句>{ ; <语句> }until<条件>
 void GrammarAnalyzer::REPEAT_STATEMENT()
 {
-	confirmValue(KW_REPEAT);
+	confirm(Word::KW_REPEAT);
 	read();
 	STATEMENT();
 	while (cur.name == ";") {
 		read();
 		STATEMENT();		
 	}
-	confirmValue(KW_UNTIL);
+	confirm(Word::KW_UNTIL);
 	read();
 	CONDITION();
 }
 
-bool GrammarAnalyzer::confirmType(Word::WordType expectedType)
+bool GrammarAnalyzer::confirm(Word::WordType expectedType)
 {
 	if (!cur.isEmptyWord()) {
 		if (cur.type == expectedType) {
 			return true;
 		}
 		else {
-			Error::raiseMissingError(cur.line, ""+expectedType);
+			Error::raiseMissingError(cur.line, Word::translator[expectedType]);
 		}
 	}
 	return false;
 }
 
-bool GrammarAnalyzer::confirmValue(std::string expectedVal)
+bool GrammarAnalyzer::confirmName(std::string expectedVal)
 {
 	if (!cur.isEmptyWord() && cur.name == expectedVal) {
 		return true;

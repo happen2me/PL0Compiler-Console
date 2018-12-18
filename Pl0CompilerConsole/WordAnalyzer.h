@@ -3,6 +3,7 @@
 #include <vector>
 #include <fstream>
 #include <iostream>
+#include <map>
 #include "Word.h"
 
 class WordAnalyzer
@@ -43,18 +44,32 @@ public:
 	std::vector<Word> getResult();
 
 	std::vector<std::string> reservedWords = { "begin", "end", "if", "then", "else", "const", "procedure", "var", "do", "while", "call", "read", "write", "odd", "repeat", "until" };
+	std::map<std::string, Word::WordType> reservedWordMap = {
+		{	"begin", 	Word::KW_BEGIN},
+		{	"end", 	Word::KW_END},
+		{	"if", 	Word::KW_IF},
+		{	"then", 	Word::KW_THEN},
+		{	"else", 	Word::KW_ELSE},
+		{	"const", 	Word::KW_CONST},
+		{	"procedure", 	Word::KW_PROCEDURE},
+		{	"var", 	Word::KW_VAR},
+		{	"do", 	Word::KW_DO},
+		{	"while", 	Word::KW_WHILE},
+		{	"call", 	Word::KW_CALL},
+		{	"read", 	Word::KW_READ},
+		{	"write", 	Word::KW_WRITE},
+		{	"odd", 	Word::KW_ODD},
+		{	"repeat", 	Word::KW_REPEAT},
+		{	"until",	Word::KW_UNTIL}
+	};
+
 	~WordAnalyzer();
 
 	std::string getBuffer() {
 		return buffer;
 	}
 
-	void printResult() {
-		std::cout << "Name" << "\t\t" << "Type" << "\t\t" << "Value" << std::endl;
-		for (int i = 0; i < results.size(); i++) {
-			std::cout << results[i].name << "\t\t" << typesName[(int)results[i].type] << "\t\t" << results[i].val << std::endl;
-		}
-	}
+	void printResult();
 
 	std::vector<std::string> typesName = { "IDENTIFIER",	"RESERVED",	"CONST", "UNARY_OPERATOR", "BINARY_OPERATOR", "SEPERATOR" };
 private:
