@@ -12,6 +12,21 @@ Error::~Error()
 {
 }
 
+void Error::raiseError(int line, ErrorType errorType)
+{
+	switch (errorType)
+	{
+	case Error::MISSING:
+		break;
+	case Error::UNEXPECTED:
+		break;
+	case Error::EXCEED_MAX_LEVEL:
+		break;
+	default:
+		break;
+	}
+}
+
 void Error::raiseError(int line, ErrorType errorType, std::string errorInfo)
 {
 	//throw std::exception(errorInfo);

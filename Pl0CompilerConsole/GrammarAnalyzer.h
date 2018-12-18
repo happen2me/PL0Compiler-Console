@@ -2,6 +2,8 @@
 #include <vector>
 #include <stack>
 #include "WordAnalyzer.h"
+#include "Symbol.h"
+#include "Instruction.h"
 
 class GrammarAnalyzer
 {
@@ -15,10 +17,12 @@ private:
 	std::stack<Word> wordStack;
 	Word cur;
 	Word nextWord;
-
+	/*For Translate*/
+	std::vector<Symbol> table; //·ûºÅ±í
+	std::vector<Instruction> pcodes;
+	int lev;
 
 	bool read();
-	
 
 	void MAIN_PROC();
 	void SUB_PROC();
@@ -43,5 +47,15 @@ private:
 
 	bool confirm(Word::WordType expectedType);
 	bool confirmName(std::string expectedVal);
+	bool checkType(Word::WordType expectedType);
+
+	/*For translate*/
+	void enter(Symbol::SymbolType type, std::string name, int value); // enter const
+	void enter(Symbol::SymbolType type, std::string name, int level, int address); // enter var and proc
+	bool checkDup(std::string name, int level);
+	int find(std::string name); // return -1 if not find
+
+	void printSymbolTable();
+
 };
 

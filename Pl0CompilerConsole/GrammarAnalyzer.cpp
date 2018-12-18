@@ -5,24 +5,26 @@
 #include "Error.h"
 using namespace std;
 
+#define DUMMY_PROC_ADDRESS -1
+
 //"begin", "end", "if", "then", "else", "const", "procedure", "var", "do", "while", "call", "read", "write", "odd", "repeat", "until"
 
-std::string KW_BEGIN = "begin";
-std::string KW_END = "end";
-std::string KW_IF = "if";
-std::string KW_THEN = "then";
-std::string KW_ELSE = "else";
-std::string KW_CONST = "const";
-std::string KW_PROCEDURE = "procedure";
-std::string KW_VAR = "var";
-std::string KW_DO = "do";
-std::string KW_WHILE = "while";
-std::string KW_CALL = "call";
-std::string KW_READ = "read";
-std::string KW_WRITE = "write";
-std::string KW_ODD = "odd";
-std::string KW_REPEAT = "repeat";
-std::string KW_UNTIL = "until";
+//std::string KW_BEGIN = "begin";
+//std::string KW_END = "end";
+//std::string KW_IF = "if";
+//std::string KW_THEN = "then";
+//std::string KW_ELSE = "else";
+//std::string KW_CONST = "const";
+//std::string KW_PROCEDURE = "procedure";
+//std::string KW_VAR = "var";
+//std::string KW_DO = "do";
+//std::string KW_WHILE = "while";
+//std::string KW_CALL = "call";
+//std::string KW_READ = "read";
+//std::string KW_WRITE = "write";
+//std::string KW_ODD = "odd";
+//std::string KW_REPEAT = "repeat";
+//std::string KW_UNTIL = "until";
 
 GrammarAnalyzer::GrammarAnalyzer()
 {
@@ -72,6 +74,7 @@ void GrammarAnalyzer::runCompile()
 //<主程序>::=<分程序>.
 void GrammarAnalyzer::MAIN_PROC()
 {
+	lev = -1;
 	try {
 		SUB_PROC();
 		//confirmName(".");
@@ -88,11 +91,14 @@ void GrammarAnalyzer::MAIN_PROC()
 		std::cerr << "There are still " << wordStack.size() << " words remains in statck" << std::endl;
 		std::cerr << "cur is in line " << cur.line << std::endl;
 	}
+	printSymbolTable();
 }
 
 //<分程序>::=[<常量说明部分>][<变量说明部分>][<过程说明部分>]<语句>
 void GrammarAnalyzer::SUB_PROC()
 {
+	int stored_lev = lev;
+	lev += 1;
 	if (cur.type == Word::KW_CONST) {
 		CONST_DECLARATION();
 	}
@@ -103,6 +109,7 @@ void GrammarAnalyzer::SUB_PROC()
 		PROCEDURE_DECLARATION();
 	}
 	STATEMENT();
+	lev = stored_lev;
 }
 
 //<语句>::=<赋值语句> | <条件语句> | <当循环语句> | <过程调用语句> | <复合语句> | <读语句> | <写语句> | <重复语句> | <空>
@@ -222,7 +229,7 @@ void GrammarAnalyzer::CONST_DECLARATION()
 	}
 	else {
 		//TODO: error: expect const
-		Error::raiseMissingError(cur.line, KW_CONST);
+		Error::raiseMissingError(cur.line, Word::translator[Word::KW_CONST]);
 	}
 }
 
@@ -232,23 +239,43 @@ void GrammarAnalyzer::CONST_DEFINITION()
 	confirm(Word::IDENTIFIER);
 	read();
 	//confirmName("=");
-	confirm(Word::OP_EQUAL);
+	if (checkType(Word::OP_ASSIGN)) {
+		Error::raiseError(cur.line, Error::SHOULD_USE_EQUAL);
+	}
+	else {
+		confirm(Word::OP_EQUAL);
+	}
 	read();
 	confirm(Word::CONST);
+	enter(Symbol::CONST, cur.name, cur.val);
 	read();
 }
 //<变量说明部分>::=var<标识符>{,<标识符>}
 void GrammarAnalyzer::VAR_DECLARATION()
 {
+	int dx = 3;
 	confirm(Word::KW_VAR);
 	read();
-	confirm(Word::IDENTIFIER);
-	read();
-	while (cur.name == ",")
+	//// confirm(Word::IDENTIFIER);
+	//if (!checkType(Word::IDENTIFIER)) {
+	//	Error::raiseError(cur.line, Error::SHOULD_IDENTIFIRE);
+	//}
+	//read();
+	while (cur.type == Word::IDENTIFIER)
 	{
+		enter(Symbol::VAR, cur.name, lev, dx);
+		dx += 1;
 		read();
-		confirm(Word::IDENTIFIER);
-		read();
+		if (checkType(Word::SP_COMMA)) {
+			read();
+		}
+		else {
+			break;
+		}
+	}
+	
+	if (dx == 3) { //means no var added
+		Error::raiseError(cur.line, Error::SHOULD_IDENTIFIRE);
 	}
 	confirm(Word::SP_SEMICOLON);
 	read();
@@ -259,7 +286,13 @@ void GrammarAnalyzer::PROCEDURE_DECLARATION()
 {
 	confirm(Word::KW_PROCEDURE);
 	read();
-	confirm(Word::IDENTIFIER);
+	//confirm(Word::IDENTIFIER);
+	if (checkType(Word::IDENTIFIER)) {
+		enter(Symbol::PROC, cur.name, lev, DUMMY_PROC_ADDRESS); //TODO: fill address
+	}
+	else {
+		Error::raiseError(cur.line, Error::SHOULD_IDENTIFIRE);
+	}
 	read();
 	confirm(Word::SP_SEMICOLON);
 	read();
@@ -399,4 +432,68 @@ bool GrammarAnalyzer::confirmName(std::string expectedVal)
 	}
 	Error::raiseMissingError(cur.line, expectedVal);
 	return false;
+}
+
+bool GrammarAnalyzer::checkType(Word::WordType expectedType)
+{
+	if (cur.isEmptyWord()) {
+		return false;
+	}
+	return cur.type == expectedType;
+}
+
+void GrammarAnalyzer::enter(Symbol::SymbolType type, std::string name, int value)
+{
+	table.push_back(Symbol(type, name, value));
+}
+
+void GrammarAnalyzer::enter(Symbol::SymbolType type, std::string name, int level, int address)
+{
+	table.push_back(Symbol(type, name, level, address));
+}
+
+bool GrammarAnalyzer::checkDup(std::string name, int level)
+{
+	for (int i = table.size()-1; i >= 0; i--) {
+		if (table[i].name == name && table[i].level == level) {
+			return true;
+		}
+	}
+	return false;
+}
+
+int GrammarAnalyzer::find(std::string name)
+{
+	for (int i = table.size() - 1; i >= 0; i--) {
+		if (table[i].name == name) {
+			return i;
+		}
+	}
+	return -1;
+}
+
+void GrammarAnalyzer::printSymbolTable()
+{
+	std::cout << "Type\tName\tValue\tLevel\tAddress" << std::endl;
+	for (int i = 0; i < (int)table.size(); i++) {
+		std::cout.width(8);
+		std::cout << std::left << Symbol::translator[table[i].type];
+		std::cout.width(8);
+		std::cout << std::left << table[i].name;
+		std::cout.width(8);
+		if (table[i].type == Symbol::CONST) {
+			std::cout << table[i].val;
+			std::cout.width(8);
+			std::cout << std::left << "-";
+			std::cout.width(8);
+			std::cout << std::left << "-" << std::endl;
+		}
+		else {			
+			std::cout << std::left << "-";
+			std::cout.width(8);
+			std::cout << std::left << table[i].level;
+			std::cout.width(8);
+			std::cout << std::left << table[i].address << std::endl;
+		}
+	}
 }

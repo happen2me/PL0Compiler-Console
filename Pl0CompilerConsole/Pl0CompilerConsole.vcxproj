@@ -149,13 +149,16 @@
   <ItemGroup>
     <ClInclude Include="Error.h" />
     <ClInclude Include="GrammarAnalyzer.h" />
+    <ClInclude Include="Instruction.h" />
     <ClInclude Include="pch.h" />
+    <ClInclude Include="Symbol.h" />
     <ClInclude Include="Word.h" />
     <ClInclude Include="WordAnalyzer.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Error.cpp" />
     <ClCompile Include="GrammarAnalyzer.cpp" />
+    <ClCompile Include="Instruction.cpp" />
     <ClCompile Include="pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
@@ -163,6 +166,7 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="Pl0CompilerConsole.cpp" />
+    <ClCompile Include="Symbol.cpp" />
     <ClCompile Include="Word.cpp" />
     <ClCompile Include="WordAnalyzer.cpp" />
   </ItemGroup>
