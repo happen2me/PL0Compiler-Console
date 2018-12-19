@@ -19,8 +19,10 @@ private:
 	Word nextWord;
 	/*For Translate*/
 	std::vector<Symbol> table; //符号表
-	std::vector<Instruction> pcodes;
+	std::vector<inst> pcodes;
 	int lev;
+	int cx;
+	void emit(inst::InstructionType type, int l, int m);
 
 	bool read();
 
@@ -33,7 +35,7 @@ private:
 	void TERM(); //<项>::=<因子>{<乘法运算符><因子>}
 	void CONST_DECLARATION();
 	void CONST_DEFINITION();
-	void VAR_DECLARATION();
+	void VAR_DECLARATION(int& dx);
 	void PROCEDURE_DECLARATION();
 	void ASSIGNMENT_STATEMENT(); //<赋值语句>::=<标识符>:=<表达式>
 	void COMPOUND_STATEMENT(); //<复合语句>::=begin<语句>{;<语句>}end
@@ -56,6 +58,10 @@ private:
 	int find(std::string name); // return -1 if not find
 
 	void printSymbolTable();
+	void printPcodes();
+	int position(std::string identifier, int level);
+	int getTx();
+
 
 };
 

@@ -1,5 +1,8 @@
 #pragma once
-class Instruction
+#include<map>
+#include<string>
+
+class inst
 {
 public:
 	enum InstructionType {
@@ -17,8 +20,11 @@ public:
 		RED  // RED	0, 2	Read in input from the user and store it at the top of the stack
 	};
 
-	Instruction();
-	~Instruction();
+	static std::map<InstructionType, std::string> translator;
+
+	inst();
+	inst(InstructionType type, int l, int m);
+	~inst();
 
 	InstructionType op;
 	int l;
