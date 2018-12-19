@@ -136,6 +136,25 @@ bool Word::isOperator()
 	return operaterSet.find(type) != operaterSet.end();
 }
 
+bool Word::isRetionalOperator()
+{
+	bool yes = true;
+	switch (type)
+	{
+	case Word::OP_EQUAL:
+	case Word::OP_NOT_EQUAL:
+	case Word::OP_LESS:
+	case Word::OP_LESS_EQUAL:
+	case Word::OP_ABOVE:
+	case Word::OP_ABOVE_EQUAL:
+		break;
+	default:
+		yes = false;
+		break;
+	}
+	return yes;
+}
+
 bool Word::isSeperator()
 {
 	return separatorSet.count(type) != 0;

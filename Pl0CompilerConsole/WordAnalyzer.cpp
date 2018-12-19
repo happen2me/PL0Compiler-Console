@@ -12,7 +12,7 @@ WordAnalyzer::WordAnalyzer(std::string filename) :
 	token(""),
 	num(0),
 	readPtr(0),
-	lineCounter(0)
+	lineCounter(1)
 {
 	readFile(filename);
 }

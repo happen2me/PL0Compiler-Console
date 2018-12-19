@@ -2,6 +2,7 @@
 #include "Error.h"
 #include <iostream>
 #include <exception>
+#include "Word.h"
 
 Error::Error()
 {
@@ -12,29 +13,21 @@ Error::~Error()
 {
 }
 
-void Error::raiseError(int line, ErrorType errorType)
+void Error::my_error_raise(int line, ErrorType errorType)
 {
-	switch (errorType)
-	{
-	case Error::MISSING:
-		break;
-	case Error::UNEXPECTED:
-		break;
-	case Error::EXCEED_MAX_LEVEL:
-		break;
-	default:
-		break;
-	}
+	std::cout << "Error " << errorType << " happened in line : " << line << std::endl;
 }
 
 void Error::raiseError(int line, ErrorType errorType, std::string errorInfo)
 {
 	//throw std::exception(errorInfo);
-}
+	std::cout << "Error " << errorType << " happened in line : " << line << std::endl;
+	std::cout << "Error info " << errorInfo << std::endl;
+ }
 
 void Error::raiseMissingError(int line, std::string missingStr)
 {
-	std::cerr << "Missing " << missingStr << " in line " << line << std::endl;
+	std::cerr << "Missing " << missingStr << " in line " << line+1 << std::endl;
 	throw std::exception("missing");
 }
 

@@ -59,6 +59,7 @@ public:
 	static Word CreateEmptyWord();
 	bool isEmptyWord();
 	bool isOperator();
+	bool isRetionalOperator();
 	bool isSeperator();
 	bool isReserved();
 

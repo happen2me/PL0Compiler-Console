@@ -4,6 +4,7 @@
 #include "WordAnalyzer.h"
 #include "Symbol.h"
 #include "Instruction.h"
+#include "Error.h"
 
 class GrammarAnalyzer
 {
@@ -22,6 +23,7 @@ private:
 	std::vector<inst> pcodes;
 	int lev;
 	int cx;
+	int errorCnt;
 	void emit(inst::InstructionType type, int l, int m);
 
 	bool read();
@@ -61,7 +63,10 @@ private:
 	void printPcodes();
 	int position(std::string identifier, int level);
 	int getTx();
-
-
+	bool test(int line, Word::WordType word_type, Error::ErrorType error_type);
+	void my_raise(int line, Error::ErrorType errorType){
+		std::cout << "Error " << errorType << " happened in line : " << line << std::endl;
+		std::cout << "\t" << cur.name << " read" << std::endl;
+	}
 };
 
