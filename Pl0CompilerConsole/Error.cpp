@@ -20,7 +20,6 @@ void Error::my_error_raise(int line, ErrorType errorType)
 
 void Error::raiseError(int line, ErrorType errorType, std::string errorInfo)
 {
-	//throw std::exception(errorInfo);
 	std::cout << "Error " << errorType << " happened in line : " << line << std::endl;
 	std::cout << "Error info " << errorInfo << std::endl;
  }

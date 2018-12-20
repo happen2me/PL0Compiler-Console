@@ -8,11 +8,10 @@
 
 int main()
 {
-    std::cout << "Hello World!\n"; 
 	WordAnalyzer wordAnalyzer("test.file");
 
 	wordAnalyzer.analyze();
-	wordAnalyzer.printResult();
+	//wordAnalyzer.printResult();
 	GrammarAnalyzer grammarAnalyzer(wordAnalyzer.getResult());
 	grammarAnalyzer.runCompile();
 	

@@ -6,8 +6,9 @@
 using namespace std;
 
 
-
+#define DEBUG 1
 #define VERBOSE 0
+
 
 #define DUMMY_PROC_ADDRESS -1
 #define INVALID_ADDRESS -1
@@ -59,7 +60,7 @@ GrammarAnalyzer::GrammarAnalyzer(const std::vector<Word>& wordList):
 {
 	for (int i = wordList.size() - 1; i >= 0; i--) {
 		wordStack.push(wordList[i]);
-		if (VERBOSE) {
+		if (DEBUG && VERBOSE) {
 			std::cout << "pushed " << wordStack.top().name << std::endl;
 		}		
 	}
@@ -374,6 +375,7 @@ void GrammarAnalyzer::CONST_DECLARATION()
 void GrammarAnalyzer::CONST_DEFINITION()
 {
 	confirm(Word::IDENTIFIER);
+	std::string const_name = cur.name;
 	read();
 	
 	if (checkType(Word::OP_ASSIGN)) {
@@ -387,7 +389,7 @@ void GrammarAnalyzer::CONST_DEFINITION()
 	
 	confirm(Word::CONST);
 
-	enter(Symbol::CONST, cur.name, cur.val);
+	enter(Symbol::CONST, const_name, cur.val);
 	read();
 }
 //<变量说明部分>::=var<标识符>{,<标识符>}
@@ -492,7 +494,9 @@ void GrammarAnalyzer::ASSIGNMENT_STATEMENT()
 	//}
 	confirm(Word::OP_ASSIGN);
 	read();
-	cout << "!!!! cur.type is " << Word::translator[cur.type] << " name is " << cur.name << endl;
+	if (DEBUG && VERBOSE) {
+		cout << "!!!! cur.type is " << Word::translator[cur.type] << " name is " << cur.name << endl;
+	}	
 
 	EXPRESSION();
 	if (pos != NOT_FOUND) {
@@ -567,7 +571,10 @@ void GrammarAnalyzer::WHILE_STATEMENT()
 	//confirm(Word::KW_DO);
 	test(cur.line, Word::KW_DO, Error::EXPECT_DO);
 
-	std::cout << "before do  cur is " << cur.name << std::endl;
+	if (DEBUG && VERBOSE) {
+		std::cout << "before do  cur is " << cur.name << std::endl;
+	}
+	
 	STATEMENT();
 
 	emit(inst::JMP, 0, condition_cx);
@@ -665,6 +672,7 @@ void GrammarAnalyzer::WRITE_STATEMENT()
 //<重复语句> :: = repeat<语句>{ ; <语句> }until<条件>
 void GrammarAnalyzer::REPEAT_STATEMENT()
 {
+	//TODO: gen pcode
 	confirm(Word::KW_REPEAT);
 	read();
 	STATEMENT();
@@ -739,7 +747,7 @@ int GrammarAnalyzer::find(std::string name)
 
 void GrammarAnalyzer::printSymbolTable()
 {
-	std::cout << "Type\tName\tValue\tLevel\tAddress" << std::endl;
+	std::cout << "\nType\tName\tValue\tLevel\tAddress" << std::endl;
 	for (int i = 0; i < (int)table.size(); i++) {
 		std::cout.width(8);
 		std::cout << std::left << Symbol::translator[table[i].type];

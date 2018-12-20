@@ -191,6 +191,7 @@ WordAnalyzer::~WordAnalyzer()
 }
 
 void WordAnalyzer::printResult() {
+	std::cout << std::endl;
 	std::cout.width(12);
 	std::cout << std::left << "Name";
 	std::cout.width(15);
