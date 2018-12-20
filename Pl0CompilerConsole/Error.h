@@ -40,6 +40,5 @@ public:
 	~Error();
 	static void raise(int line, ErrorType errorType);
 	static void raiseMissingError(int line, std::string missingStr);
-	//static void raise(int line, ErrorType errorType, std::string readWord, Word::WordType expectedType);
 };
 

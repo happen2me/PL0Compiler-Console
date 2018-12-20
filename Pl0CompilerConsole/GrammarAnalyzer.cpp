@@ -55,7 +55,6 @@ GrammarAnalyzer::~GrammarAnalyzer()
 void GrammarAnalyzer::emit(Instruction::InstructionType type, int l, int m)
 {
 	pcodes.push_back(Instruction(type, l, m));
-	cx++;
 }
 
 bool GrammarAnalyzer::read()
@@ -92,7 +91,6 @@ void GrammarAnalyzer::runCompile()
 void GrammarAnalyzer::MAIN_PROC()
 {
 	lev = -1;
-	cx = 0;
 	try {
 		SUB_PROC();
 		
@@ -128,7 +126,7 @@ void GrammarAnalyzer::SUB_PROC()
 
 	int dx = 3;
 	int stored_tx = getTx();
-	int stored_cx = cx;
+	int stored_cx = getCx();
 
 	emit(Instruction::JMP, 0, 0);
 
@@ -142,10 +140,10 @@ void GrammarAnalyzer::SUB_PROC()
 		PROCEDURE_DECLARATION();
 	}
 
-	pcodes[stored_cx].m = cx;
+	pcodes[stored_cx].m = getCx();
 
 	if (lev > 0) {
-		table[stored_tx-1].address = cx;
+		table[stored_tx-1].address = getCx();
 	}
 	
 
@@ -513,7 +511,7 @@ void GrammarAnalyzer::CONDITIONAL_STATEMENT()
 		Error::raise(cur.line, Error::EXPECT_THEN);
 	}
 
-	int jpc_cx = cx;
+	int jpc_cx = getCx();
 
 	emit(Instruction::JPC, 0, 0);
 
@@ -521,15 +519,15 @@ void GrammarAnalyzer::CONDITIONAL_STATEMENT()
 	if (!cur.isEmptyWord() && cur.type == Word::KW_ELSE) {
 		read();
 
-		pcodes[jpc_cx].m = cx + 1; //jumps past if
+		pcodes[jpc_cx].m = getCx() + 1; //jumps past if
 
-		jpc_cx = cx; // change to jmp_cx
+		jpc_cx = getCx(); // change to jmp_cx
 
 		emit(Instruction::JMP, 0, 0);
 
 		STATEMENT();
 	}
-	pcodes[jpc_cx].m = cx;
+	pcodes[jpc_cx].m = getCx();
 }
 //<当循环语句>::=while<条件>do<语句>
 void GrammarAnalyzer::WHILE_STATEMENT()
@@ -537,11 +535,11 @@ void GrammarAnalyzer::WHILE_STATEMENT()
 	confirm(Word::KW_WHILE);
 	read();
 
-	int condition_cx = cx;
+	int condition_cx = getCx();
 
 	CONDITION();
 
-	int jpc_cx = cx;
+	int jpc_cx = getCx();
 
 	emit(Instruction::JPC, 0, 0);
 
@@ -555,7 +553,7 @@ void GrammarAnalyzer::WHILE_STATEMENT()
 	STATEMENT();
 
 	emit(Instruction::JMP, 0, condition_cx);
-	pcodes[jpc_cx].m = cx; // points to code after statement
+	pcodes[jpc_cx].m = getCx(); // points to code after statement
 }
 
 // <过程调用语句>::=call<标识符>
@@ -654,7 +652,7 @@ void GrammarAnalyzer::REPEAT_STATEMENT()
 	confirm(Word::KW_REPEAT);
 	read();
 
-	int statemetn_cx = cx;
+	int statemetn_cx = getCx();
 
 	STATEMENT();
 	while (cur.name == ";") {
@@ -776,6 +774,11 @@ int GrammarAnalyzer::position(std::string identifier, int level)
 int GrammarAnalyzer::getTx()
 {
 	return table.size();
+}
+
+int GrammarAnalyzer::getCx()
+{
+	return pcodes.size();
 }
 
 bool GrammarAnalyzer::test(int line, Word::WordType word_type, Error::ErrorType error_type)

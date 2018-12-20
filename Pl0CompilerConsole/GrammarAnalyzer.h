@@ -22,7 +22,6 @@ private:
 	std::vector<Symbol> table; //·ûºÅ±í
 	std::vector<Instruction> pcodes;
 	int lev;
-	int cx;
 	int errorCnt;
 	void emit(Instruction::InstructionType type, int l, int m);
 
@@ -63,6 +62,7 @@ private:
 	void printPcodes();
 	int position(std::string identifier, int level);
 	int getTx();
+	int getCx();
 	bool test(int line, Word::WordType word_type, Error::ErrorType error_type);
 };
 
