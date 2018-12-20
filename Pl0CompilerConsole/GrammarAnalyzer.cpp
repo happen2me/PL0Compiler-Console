@@ -125,7 +125,7 @@ void GrammarAnalyzer::MAIN_PROC()
 	}
 
 	if (wordStack.empty()) {
-		std::cout << "\nGrammar Analyze Succeed" << std::endl;
+		std::cout << "\nGrammar Analyze finished" << std::endl;
 	}
 	else {
 		std::cerr << "\nThere are still " << wordStack.size() << " words remains in statck" << std::endl;
@@ -660,6 +660,7 @@ void GrammarAnalyzer::WRITE_STATEMENT()
 	confirmName("(");
 	read();
 	EXPRESSION();
+	emit(inst::WRT, 0, 1);
 	while (cur.name == ",") {
 		read();
 		EXPRESSION();
@@ -675,6 +676,9 @@ void GrammarAnalyzer::REPEAT_STATEMENT()
 	//TODO: gen pcode
 	confirm(Word::KW_REPEAT);
 	read();
+
+	int statemetn_cx = cx;
+
 	STATEMENT();
 	while (cur.name == ";") {
 		read();
@@ -683,6 +687,9 @@ void GrammarAnalyzer::REPEAT_STATEMENT()
 	confirm(Word::KW_UNTIL);
 	read();
 	CONDITION();
+
+	emit(inst::JPC, 0, statemetn_cx);
+
 }
 
 bool GrammarAnalyzer::confirm(Word::WordType expectedType)

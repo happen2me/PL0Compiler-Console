@@ -8,12 +8,17 @@
 
 int main()
 {
-	WordAnalyzer wordAnalyzer("test.file");
-
-	wordAnalyzer.analyze();
-	//wordAnalyzer.printResult();
-	GrammarAnalyzer grammarAnalyzer(wordAnalyzer.getResult());
-	grammarAnalyzer.runCompile();
+	try {
+		WordAnalyzer wordAnalyzer("code_samples/right1.pl0");
+		wordAnalyzer.analyze();
+		wordAnalyzer.printResult();
+		GrammarAnalyzer grammarAnalyzer(wordAnalyzer.getResult());
+		grammarAnalyzer.runCompile();
+	}
+	catch (const std::exception e) {
+		std::cerr << e.what() << std::endl;
+	}
+	
 	
 	return 0;
 }

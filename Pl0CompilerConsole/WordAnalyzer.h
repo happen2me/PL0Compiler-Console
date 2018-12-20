@@ -84,6 +84,7 @@ private:
 
 	void readFile(std::string filename);
 	Word identifyWord();
+	bool fileExits(std::string filename);
 
 };
 

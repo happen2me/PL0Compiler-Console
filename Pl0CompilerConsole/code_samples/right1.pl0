@@ -1,0 +1,7 @@
+const a=21, b=3;
+var c;
+begin
+	write(a);
+	c := a + b;
+	write(c);
+end.

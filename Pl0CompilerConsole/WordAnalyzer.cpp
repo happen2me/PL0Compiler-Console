@@ -213,6 +213,9 @@ void WordAnalyzer::printResult() {
 
 void WordAnalyzer::readFile(std::string filename)
 {
+	if (!fileExits(filename)) {
+		throw std::exception("Failed to open file, probably you input wrong file name");
+	}
 	try
 	{
 		std::ifstream in(filename);
@@ -420,6 +423,12 @@ Word WordAnalyzer::identifyWord()
 	}
 
 	return Word(lineCounter, token, symbol);
+}
+
+bool WordAnalyzer::fileExits(std::string filename)
+{
+	struct stat buffer;
+	return (stat(filename.c_str(), &buffer) == 0);
 }
 
 
