@@ -15,20 +15,7 @@ using namespace std;
 
 #define MAX_NEST_LEVEL 3
 
-#define OT_RET 0
-#define OT_NEG 1
-#define OT_ADD 2
-#define OT_SUB 2
-#define OT_MUL 4
-#define OT_DIV 5
-#define OT_ODD 6
-#define OT_MOD 7
-#define OT_EQL 8
-#define OT_NEQ 9
-#define OT_LSS 10
-#define OT_LEQ 11
-#define OT_GTR 12
-#define OT_GEQ 13
+
 
 #define NOT_FOUND -1
 
@@ -151,7 +138,7 @@ void GrammarAnalyzer::SUB_PROC()
 
 	STATEMENT();
 
-	emit(Instruction::OPR, 0, OT_RET);
+	emit(Instruction::OPR, 0, Instruction::OT_RET);
 
 	lev = stored_lev;
 }
@@ -203,7 +190,7 @@ void GrammarAnalyzer::EXPRESSION()
 	}
 	TERM();
 	if (neg_start) {
-		emit(Instruction::OPR, 0, OT_NEG);
+		emit(Instruction::OPR, 0, Instruction::OT_NEG);
 	}
 
 	while (cur.name == "+" || cur.name == "-")
@@ -212,10 +199,10 @@ void GrammarAnalyzer::EXPRESSION()
 		read();
 		TERM();
 		if (is_plus) {
-			emit(Instruction::OPR, 0, OT_ADD);
+			emit(Instruction::OPR, 0, Instruction::OT_ADD);
 		}
 		else {
-			emit(Instruction::OPR, 0, OT_SUB);
+			emit(Instruction::OPR, 0, Instruction::OT_SUB);
 		}
 	}
 }
@@ -226,7 +213,7 @@ void GrammarAnalyzer::CONDITION()
 	if (cur.type == Word::KW_ODD) {
 		read();
 		EXPRESSION();
-		emit(Instruction::OPR, 0, OT_ODD);
+		emit(Instruction::OPR, 0, Instruction::OT_ODD);
 	}
 	else {
 		EXPRESSION();
@@ -239,22 +226,22 @@ void GrammarAnalyzer::CONDITION()
 		switch (opr_type)
 		{
 		case Word::OP_EQUAL:
-			emit(Instruction::OPR, 0, OT_EQL);
+			emit(Instruction::OPR, 0, Instruction::OT_EQL);
 			break;
 		case Word::OP_NOT_EQUAL:
-			emit(Instruction::OPR, 0, OT_NEQ);
+			emit(Instruction::OPR, 0, Instruction::OT_NEQ);
 			break;
 		case Word::OP_LESS:
-			emit(Instruction::OPR, 0, OT_LSS);
+			emit(Instruction::OPR, 0, Instruction::OT_LSS);
 			break;
 		case Word::OP_LESS_EQUAL:
-			emit(Instruction::OPR, 0, OT_LEQ);
+			emit(Instruction::OPR, 0, Instruction::OT_LEQ);
 			break;
 		case Word::OP_ABOVE:
-			emit(Instruction::OPR, 0, OT_GTR);
+			emit(Instruction::OPR, 0, Instruction::OT_GTR);
 			break;
 		case Word::OP_ABOVE_EQUAL:
-			emit(Instruction::OPR, 0, OT_GEQ);
+			emit(Instruction::OPR, 0, Instruction::OT_GEQ);
 			break;
 		default:
 			if (!cur.isRetionalOperator()) {
@@ -322,10 +309,10 @@ void GrammarAnalyzer::TERM()
 		FACTOR();
 		
 		if (is_multiply) {
-			emit(Instruction::OPR, 0, OT_MUL);
+			emit(Instruction::OPR, 0, Instruction::OT_MUL);
 		}
 		else {
-			emit(Instruction::OPR, 0, OT_DIV);
+			emit(Instruction::OPR, 0, Instruction::OT_DIV);
 		}
 	}
 }
