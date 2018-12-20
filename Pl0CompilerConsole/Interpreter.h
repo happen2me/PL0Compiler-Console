@@ -12,6 +12,8 @@ public:
 	Interpreter(std::vector<Instruction> pcodes);
 	~Interpreter();
 
+	void run();
+
 private:
 	std::vector<Instruction> instructions;
 	int data[MAX_RUN_STACK_HEIGHT] = {0, };
@@ -19,11 +21,12 @@ private:
 	int bp; // base pointer
 	int sp; // stack pointer
 	Instruction ir; // instruction register
-
-	void run();
+	
 	void exe();
 	void opr(Instruction::OperationType opr_type);
-	int base();
+	int base(int b_ptr, int level);
+	void push(int x);
+	int pop();
 	bool fetch(); // fetch an instruction into ir
 };
 

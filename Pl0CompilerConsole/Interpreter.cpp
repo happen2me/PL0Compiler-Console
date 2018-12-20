@@ -74,11 +74,12 @@ void Interpreter::exe()
 
 void Interpreter::opr(Instruction::OperationType opr_type)
 {
+	int a, b, stored_bp;
 	switch (opr_type)
 	{
 	case Instruction::OT_RET:
 		pc = data[bp + 2];
-		int stored_bp = bp;
+		stored_bp = bp;
 		bp = bp + 1;
 		sp = stored_bp - 1;
 		break;
@@ -86,59 +87,61 @@ void Interpreter::opr(Instruction::OperationType opr_type)
 		push(-pop());
 		break;
 	case Instruction::OT_ADD:
-		int a = pop();
-		int b = pop();
+		a = pop();
+		b = pop();
 		push(a + b);
 		break;
 	case Instruction::OT_SUB:
-		int a = pop();
-		int b = pop();
+		a = pop();
+		b = pop();
 		push(b - a);
 		break;
 	case Instruction::OT_MUL:
-		int a = pop();
-		int b = pop();
+		a = pop();
+		b = pop();
 		push(a*b);
 		break;
 	case Instruction::OT_DIV:
-		int a = pop();
-		int b = pop();
+		a = pop();
+		b = pop();
 		push(b / a);
 		break;
 	case Instruction::OT_ODD:
 		push(pop() % 2);
 		break;
 	case Instruction::OT_MOD:
-		int a = pop();
-		int b = pop();
+		a = pop();
+		b = pop();
 		push(b % a);
 		break;
 	case Instruction::OT_EQL:
-		int a = pop();
-		int b = pop();
+		a = pop();
+		b = pop();
 		push(a == b);
 		break;
 	case Instruction::OT_NEQ:
+		a = pop();
+		b = pop();
 		push(a != b);
 		break;
 	case Instruction::OT_LSS:
-		int a = pop();
-		int b = pop();
+		a = pop();
+		b = pop();
 		push(b < a);
 		break;
 	case Instruction::OT_LEQ:
-		int a = pop();
-		int b = pop();
+		a = pop();
+		b = pop();
 		push(b <= a);
 		break;
 	case Instruction::OT_GTR:
-		int a = pop();
-		int b = pop();
+		a = pop();
+		b = pop();
 		push(b > a);
 		break;
 	case Instruction::OT_GEQ:
-		int a = pop();
-		int b = pop();
+		a = pop();
+		b = pop();
 		push(b >= a);
 		break;
 	default:
@@ -169,9 +172,10 @@ int Interpreter::pop()
 
 bool Interpreter::fetch()
 {
-	if (pc >= instructions.size()) {
+	if (pc >= (int)instructions.size()) {
 		return false;
 	}
 	ir = instructions[pc];
 	pc++;
+	return true;
 }

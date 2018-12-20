@@ -20,6 +20,23 @@ public:
 		RED  // RED	0, 2	Read in input from the user and store it at the top of the stack
 	};
 
+	enum OperationType {
+		OT_RET,
+		OT_NEG,
+		OT_ADD,
+		OT_SUB,
+		OT_MUL,
+		OT_DIV,
+		OT_ODD,
+		OT_MOD,
+		OT_EQL,
+		OT_NEQ,
+		OT_LSS,
+		OT_LEQ,
+		OT_GTR,
+		OT_GEQ,
+	};
+
 	static std::map<InstructionType, std::string> translator;
 
 	Instruction();

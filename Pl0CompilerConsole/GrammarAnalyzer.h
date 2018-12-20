@@ -13,6 +13,7 @@ public:
 	GrammarAnalyzer(const std::vector<Word>& wordList);
 	virtual ~GrammarAnalyzer();
 	void runCompile();
+	std::vector<Instruction> getResults();
 
 private:
 	std::stack<Word> wordStack;
@@ -64,5 +65,6 @@ private:
 	int getTx();
 	int getCx();
 	bool test(int line, Word::WordType word_type, Error::ErrorType error_type);
+	
 };
 

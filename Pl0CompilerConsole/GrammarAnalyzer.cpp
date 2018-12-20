@@ -15,8 +15,6 @@ using namespace std;
 
 #define MAX_NEST_LEVEL 3
 
-
-
 #define NOT_FOUND -1
 
 GrammarAnalyzer::GrammarAnalyzer()
@@ -779,6 +777,11 @@ bool GrammarAnalyzer::test(int line, Word::WordType word_type, Error::ErrorType 
 		std::cout << "\t " << Word::translator[word_type] << " expected" << std::endl;
 		return false;
 	}
+}
+
+std::vector<Instruction> GrammarAnalyzer::getResults()
+{
+	return pcodes;
 }
 
 

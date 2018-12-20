@@ -5,6 +5,7 @@
 #include <iostream>
 #include "WordAnalyzer.h"
 #include "GrammarAnalyzer.h"
+#include "Interpreter.h"
 
 int main()
 {
@@ -14,6 +15,8 @@ int main()
 		wordAnalyzer.printResult();
 		GrammarAnalyzer grammarAnalyzer(wordAnalyzer.getResult());
 		grammarAnalyzer.runCompile();
+		Interpreter interpreter(grammarAnalyzer.getResults());
+		interpreter.run();
 	}
 	catch (const std::exception e) {
 		std::cerr << e.what() << std::endl;
