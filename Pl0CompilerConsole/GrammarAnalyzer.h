@@ -20,11 +20,11 @@ private:
 	Word nextWord;
 	/*For Translate*/
 	std::vector<Symbol> table; //·ûºÅ±í
-	std::vector<inst> pcodes;
+	std::vector<Instruction> pcodes;
 	int lev;
 	int cx;
 	int errorCnt;
-	void emit(inst::InstructionType type, int l, int m);
+	void emit(Instruction::InstructionType type, int l, int m);
 
 	bool read();
 
@@ -64,9 +64,5 @@ private:
 	int position(std::string identifier, int level);
 	int getTx();
 	bool test(int line, Word::WordType word_type, Error::ErrorType error_type);
-	void my_raise(int line, Error::ErrorType errorType){
-		std::cout << "Error " << errorType << " happened in line : " << line << std::endl;
-		std::cout << "\t" << cur.name << " read" << std::endl;
-	}
 };
 

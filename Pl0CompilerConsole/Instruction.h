@@ -2,7 +2,7 @@
 #include<map>
 #include<string>
 
-class inst
+class Instruction
 {
 public:
 	enum InstructionType {
@@ -22,9 +22,9 @@ public:
 
 	static std::map<InstructionType, std::string> translator;
 
-	inst();
-	inst(InstructionType type, int l, int m);
-	~inst();
+	Instruction();
+	Instruction(InstructionType type, int l, int m);
+	~Instruction();
 
 	InstructionType op;
 	int l;

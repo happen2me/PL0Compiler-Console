@@ -32,25 +32,6 @@ using namespace std;
 
 #define NOT_FOUND -1
 
-//"begin", "end", "if", "then", "else", "const", "procedure", "var", "do", "while", "call", "read", "write", "odd", "repeat", "until"
-
-//std::string KW_BEGIN = "begin";
-//std::string KW_END = "end";
-//std::string KW_IF = "if";
-//std::string KW_THEN = "then";
-//std::string KW_ELSE = "else";
-//std::string KW_CONST = "const";
-//std::string KW_PROCEDURE = "procedure";
-//std::string KW_VAR = "var";
-//std::string KW_DO = "do";
-//std::string KW_WHILE = "while";
-//std::string KW_CALL = "call";
-//std::string KW_READ = "read";
-//std::string KW_WRITE = "write";
-//std::string KW_ODD = "odd";
-//std::string KW_REPEAT = "repeat";
-//std::string KW_UNTIL = "until";
-
 GrammarAnalyzer::GrammarAnalyzer()
 {
 }
@@ -71,9 +52,9 @@ GrammarAnalyzer::~GrammarAnalyzer()
 {
 }
 
-void GrammarAnalyzer::emit(inst::InstructionType type, int l, int m)
+void GrammarAnalyzer::emit(Instruction::InstructionType type, int l, int m)
 {
-	pcodes.push_back(inst(type, l, m));
+	pcodes.push_back(Instruction(type, l, m));
 	cx++;
 }
 
@@ -116,7 +97,7 @@ void GrammarAnalyzer::MAIN_PROC()
 		SUB_PROC();
 		
 		if (!checkType(Word::SP_DOT)) {
-			my_raise(cur.line, Error::EXPECT_DOT_AT_END);
+			Error::raise(cur.line, Error::EXPECT_DOT_AT_END);
 		}
 
 	}
@@ -142,14 +123,14 @@ void GrammarAnalyzer::SUB_PROC()
 	lev += 1;
 
 	if (lev > MAX_NEST_LEVEL) {
-		my_raise(cur.line, Error::EXCEED_MAX_LEVEL);
+		Error::raise(cur.line, Error::EXCEED_MAX_LEVEL);
 	}
 
 	int dx = 3;
 	int stored_tx = getTx();
 	int stored_cx = cx;
 
-	emit(inst::JMP, 0, 0);
+	emit(Instruction::JMP, 0, 0);
 
 	if (cur.type == Word::KW_CONST) {
 		CONST_DECLARATION();
@@ -168,11 +149,11 @@ void GrammarAnalyzer::SUB_PROC()
 	}
 	
 
-	emit(inst::INC, 0, dx); // space for var
+	emit(Instruction::INC, 0, dx); // space for var
 
 	STATEMENT();
 
-	emit(inst::OPR, 0, OT_RET);
+	emit(Instruction::OPR, 0, OT_RET);
 
 	lev = stored_lev;
 }
@@ -214,7 +195,7 @@ void GrammarAnalyzer::EXPRESSION()
 	std::set<Word::WordType> expression_first = {Word::OP_PLUS, Word::OP_MINUS, Word::SP_LEFT_PAR, Word::IDENTIFIER, Word::CONST};
 	
 	if (expression_first.count(cur.type) == 0) {
-		my_raise(cur.line, Error::INCORECT_SYMBOL_LEADS_EXPRESSION);
+		Error::raise(cur.line, Error::INCORECT_SYMBOL_LEADS_EXPRESSION);
 	}
 	
 	bool neg_start = false;
@@ -224,7 +205,7 @@ void GrammarAnalyzer::EXPRESSION()
 	}
 	TERM();
 	if (neg_start) {
-		emit(inst::OPR, 0, OT_NEG);
+		emit(Instruction::OPR, 0, OT_NEG);
 	}
 
 	while (cur.name == "+" || cur.name == "-")
@@ -233,10 +214,10 @@ void GrammarAnalyzer::EXPRESSION()
 		read();
 		TERM();
 		if (is_plus) {
-			emit(inst::OPR, 0, OT_ADD);
+			emit(Instruction::OPR, 0, OT_ADD);
 		}
 		else {
-			emit(inst::OPR, 0, OT_SUB);
+			emit(Instruction::OPR, 0, OT_SUB);
 		}
 	}
 }
@@ -247,7 +228,7 @@ void GrammarAnalyzer::CONDITION()
 	if (cur.type == Word::KW_ODD) {
 		read();
 		EXPRESSION();
-		emit(inst::OPR, 0, OT_ODD);
+		emit(Instruction::OPR, 0, OT_ODD);
 	}
 	else {
 		EXPRESSION();
@@ -260,30 +241,30 @@ void GrammarAnalyzer::CONDITION()
 		switch (opr_type)
 		{
 		case Word::OP_EQUAL:
-			emit(inst::OPR, 0, OT_EQL);
+			emit(Instruction::OPR, 0, OT_EQL);
 			break;
 		case Word::OP_NOT_EQUAL:
-			emit(inst::OPR, 0, OT_NEQ);
+			emit(Instruction::OPR, 0, OT_NEQ);
 			break;
 		case Word::OP_LESS:
-			emit(inst::OPR, 0, OT_LSS);
+			emit(Instruction::OPR, 0, OT_LSS);
 			break;
 		case Word::OP_LESS_EQUAL:
-			emit(inst::OPR, 0, OT_LEQ);
+			emit(Instruction::OPR, 0, OT_LEQ);
 			break;
 		case Word::OP_ABOVE:
-			emit(inst::OPR, 0, OT_GTR);
+			emit(Instruction::OPR, 0, OT_GTR);
 			break;
 		case Word::OP_ABOVE_EQUAL:
-			emit(inst::OPR, 0, OT_GEQ);
+			emit(Instruction::OPR, 0, OT_GEQ);
 			break;
 		default:
 			if (!cur.isRetionalOperator()) {
 				if (checkType(Word::OP_ASSIGN)) {
-					my_raise(cur.line, Error::USE_EQUAL_INSTEAD_OF_ASSIGN);
+					Error::raise(cur.line, Error::USE_EQUAL_INSTEAD_OF_ASSIGN);
 				}
 				else {
-					my_raise(cur.line, Error::EXPECT_RATIONAL_OPERATOR);
+					Error::raise(cur.line, Error::EXPECT_RATIONAL_OPERATOR);
 				}
 			}
 			break;
@@ -299,17 +280,17 @@ void GrammarAnalyzer::FACTOR()
 		int pos = position(cur.name, lev);
 
 		if (pos == NOT_FOUND) {
-			my_raise(cur.line, Error::UNDECLARED_IDENTIFIER);
+			Error::raise(cur.line, Error::UNDECLARED_IDENTIFIER);
 		}
 		else {
 			if (table[pos].type == Symbol::CONST) {
-				emit(inst::LIT, 0, table[pos].val);
+				emit(Instruction::LIT, 0, table[pos].val);
 			}
 			else if(table[pos].type == Symbol::VAR){
-				emit(inst::LOD, lev - table[pos].level, table[pos].address);
+				emit(Instruction::LOD, lev - table[pos].level, table[pos].address);
 			}
 			else {
-				my_raise(cur.line, Error::EXPRESSION_CANNOT_CONTAIN_PROC);
+				Error::raise(cur.line, Error::EXPRESSION_CANNOT_CONTAIN_PROC);
 			}
 		}
 
@@ -317,7 +298,7 @@ void GrammarAnalyzer::FACTOR()
 	}
 	else if (cur.type == Word::CONST) {
 
-		emit(inst::LIT, 0, cur.val);
+		emit(Instruction::LIT, 0, cur.val);
 
 		read();
 
@@ -328,7 +309,7 @@ void GrammarAnalyzer::FACTOR()
 		test(cur.line, Word::SP_RIGHT_PAR, Error::MISSING_RIGHT_PARENTHESIS);
 	}
 	else {
-		Error::raiseUnexpectedError(cur.line, cur.name);
+		Error::raise(cur.line, Error::UNEXPECTED);
 	}
 }
 
@@ -343,10 +324,10 @@ void GrammarAnalyzer::TERM()
 		FACTOR();
 		
 		if (is_multiply) {
-			emit(inst::OPR, 0, OT_MUL);
+			emit(Instruction::OPR, 0, OT_MUL);
 		}
 		else {
-			emit(inst::OPR, 0, OT_DIV);
+			emit(Instruction::OPR, 0, OT_DIV);
 		}
 	}
 }
@@ -354,21 +335,17 @@ void GrammarAnalyzer::TERM()
 //<常量说明部分>::=const <常量定义>{,<常量定义>}
 void GrammarAnalyzer::CONST_DECLARATION()
 {
-	if (cur.type == Word::KW_CONST) {
+
+	test(cur.line, Word::KW_CONST, Error::EXPECT);
+	CONST_DEFINITION();
+	while (cur.name == ",")
+	{
 		read();
 		CONST_DEFINITION();
-		while (cur.name == ",")
-		{
-			read();
-			CONST_DEFINITION();
-		}
+	}
 
-		test(cur.line, Word::SP_SEMICOLON, Error::MISSING_COMMA_OR_SEMICOLON);
-	}
-	else {
-		Error::raiseMissingError(cur.line, Word::translator[Word::KW_CONST]);
-		std::cout << "\ncur.name=" << cur.name << std::endl;
-	}
+	test(cur.line, Word::SP_SEMICOLON, Error::MISSING_COMMA_OR_SEMICOLON);
+
 }
 
 //<常量定义>::=<标识符>=<无符号整数>
@@ -379,7 +356,7 @@ void GrammarAnalyzer::CONST_DEFINITION()
 	read();
 	
 	if (checkType(Word::OP_ASSIGN)) {
-		my_raise(cur.line, Error::USE_EQUAL_INSTEAD_OF_ASSIGN);
+		Error::raise(cur.line, Error::USE_EQUAL_INSTEAD_OF_ASSIGN);
 		read();
 	}
 	else {
@@ -399,7 +376,7 @@ void GrammarAnalyzer::VAR_DECLARATION(int& dx)
 	read();
 	//// confirm(Word::IDENTIFIER);
 	//if (!checkType(Word::IDENTIFIER)) {
-	//	my_raise(cur.line, Error::SHOULD_IDENTIFIRE);
+	//	Error::raise(cur.line, Error::SHOULD_IDENTIFIRE);
 	//}
 	//read();
 	while (cur.type == Word::IDENTIFIER)
@@ -417,14 +394,14 @@ void GrammarAnalyzer::VAR_DECLARATION(int& dx)
 	
 	
 	if (dx == 3) { //means no var added
-		my_raise(cur.line, Error::SHOULD_BE_FOLLOWED_BY_IDENTIFIRE);
+		Error::raise(cur.line, Error::SHOULD_BE_FOLLOWED_BY_IDENTIFIRE);
 	}
 
 	if (checkType(Word::SP_SEMICOLON)) {
 		read();
 	}
 	else {
-		my_raise(cur.line, Error::MISSING_COMMA_OR_SEMICOLON);
+		Error::raise(cur.line, Error::MISSING_COMMA_OR_SEMICOLON);
 	}
 	
 }
@@ -439,7 +416,7 @@ void GrammarAnalyzer::PROCEDURE_DECLARATION()
 		enter(Symbol::PROC, cur.name, lev, DUMMY_PROC_ADDRESS); //TODO: fill address
 	}
 	else {
-		my_raise(cur.line, Error::SHOULD_BE_FOLLOWED_BY_IDENTIFIRE);
+		Error::raise(cur.line, Error::SHOULD_BE_FOLLOWED_BY_IDENTIFIRE);
 	}
 	read();
 	
@@ -447,7 +424,7 @@ void GrammarAnalyzer::PROCEDURE_DECLARATION()
 		read();
 	}
 	else {
-		my_raise(cur.line, Error::MISSING_COMMA_OR_SEMICOLON);
+		Error::raise(cur.line, Error::MISSING_COMMA_OR_SEMICOLON);
 	}
 
 	SUB_PROC();
@@ -456,7 +433,7 @@ void GrammarAnalyzer::PROCEDURE_DECLARATION()
 		read();
 	}
 	else {
-		my_raise(cur.line, Error::MISSING_COMMA_OR_SEMICOLON);
+		Error::raise(cur.line, Error::MISSING_COMMA_OR_SEMICOLON);
 	}
 
 	while (!cur.isEmptyWord() && cur.type == Word::KW_PROCEDURE)
@@ -474,23 +451,23 @@ void GrammarAnalyzer::ASSIGNMENT_STATEMENT()
 	int pos = position(cur.name, lev);
 
 	if (pos == NOT_FOUND) {
-		my_raise(cur.line, Error::UNDECLARED_IDENTIFIER);
+		Error::raise(cur.line, Error::UNDECLARED_IDENTIFIER);
 	}
 	else if(table[pos].type == Symbol::PROC || table[pos].type == Symbol::CONST){
-		my_raise(cur.line, Error::ASSIGNED_TO_CONST_OR_PROC);
+		Error::raise(cur.line, Error::ASSIGNED_TO_CONST_OR_PROC);
 	}
 
 	read();
 
 	//if (checkType(Word::OP_EQUAL)) {
-	//	my_raise(cur.line, Error::USE_ASSIGN_INSTEAD_OF_EQUAL);
+	//	Error::raise(cur.line, Error::USE_ASSIGN_INSTEAD_OF_EQUAL);
 	//	read();
 	//}
 	//else if(checkType(Word::OP_ASSIGN)){
 	//	read();
 	//}
 	//else {
-	//	my_raise(cur.line, Error::EXPECT_ASSIGN);
+	//	Error::raise(cur.line, Error::EXPECT_ASSIGN);
 	//}
 	confirm(Word::OP_ASSIGN);
 	read();
@@ -500,7 +477,7 @@ void GrammarAnalyzer::ASSIGNMENT_STATEMENT()
 
 	EXPRESSION();
 	if (pos != NOT_FOUND) {
-		emit(inst::STO, lev - table[pos].level, table[pos].address);
+		emit(Instruction::STO, lev - table[pos].level, table[pos].address);
 	}
 }
 
@@ -533,12 +510,12 @@ void GrammarAnalyzer::CONDITIONAL_STATEMENT()
 		read();
 	}
 	else {
-		my_raise(cur.line, Error::EXPECT_THEN);
+		Error::raise(cur.line, Error::EXPECT_THEN);
 	}
 
 	int jpc_cx = cx;
 
-	emit(inst::JPC, 0, 0);
+	emit(Instruction::JPC, 0, 0);
 
 	STATEMENT();
 	if (!cur.isEmptyWord() && cur.type == Word::KW_ELSE) {
@@ -548,7 +525,7 @@ void GrammarAnalyzer::CONDITIONAL_STATEMENT()
 
 		jpc_cx = cx; // change to jmp_cx
 
-		emit(inst::JMP, 0, 0);
+		emit(Instruction::JMP, 0, 0);
 
 		STATEMENT();
 	}
@@ -566,7 +543,7 @@ void GrammarAnalyzer::WHILE_STATEMENT()
 
 	int jpc_cx = cx;
 
-	emit(inst::JPC, 0, 0);
+	emit(Instruction::JPC, 0, 0);
 
 	//confirm(Word::KW_DO);
 	test(cur.line, Word::KW_DO, Error::EXPECT_DO);
@@ -577,7 +554,7 @@ void GrammarAnalyzer::WHILE_STATEMENT()
 	
 	STATEMENT();
 
-	emit(inst::JMP, 0, condition_cx);
+	emit(Instruction::JMP, 0, condition_cx);
 	pcodes[jpc_cx].m = cx; // points to code after statement
 }
 
@@ -588,19 +565,19 @@ void GrammarAnalyzer::CALL_STATEMENT()
 	read();
 
 	if (!checkType(Word::IDENTIFIER)) {
-		my_raise(cur.line, Error::EXPECT_IDENTIFIER_AFTER_CALL);
+		Error::raise(cur.line, Error::EXPECT_IDENTIFIER_AFTER_CALL);
 	}
 	else {
 		int pos = position(cur.name, lev);
 
 		if (pos == NOT_FOUND) {
-			my_raise(cur.line, Error::UNDECLARED_IDENTIFIER);
+			Error::raise(cur.line, Error::UNDECLARED_IDENTIFIER);
 		}
 		else if (table[pos].type == Symbol::PROC) {
-			emit(inst::CALL, lev - table[pos].level, table[pos].address);
+			emit(Instruction::CALL, lev - table[pos].level, table[pos].address);
 		}
 		else {
-			my_raise(cur.line, Error::CANNOT_CALL_VAR_OR_CONST);
+			Error::raise(cur.line, Error::CANNOT_CALL_VAR_OR_CONST);
 		}
 
 		read();
@@ -625,18 +602,18 @@ void GrammarAnalyzer::READ_STATEMENT()
 
 	while (checkType(Word::IDENTIFIER))
 	{
-		emit(inst::RED, 0, 0); //读取元素置于栈顶
+		emit(Instruction::RED, 0, 0); //读取元素置于栈顶
 
 		int pos = position(cur.name, lev);
 
 		if (pos == NOT_FOUND) {
-			my_raise(cur.line, Error::UNDECLARED_IDENTIFIER);			
+			Error::raise(cur.line, Error::UNDECLARED_IDENTIFIER);			
 		}
 		else if(table[pos].type == Symbol::CONST || table[pos].type == Symbol::PROC){
-			my_raise(cur.line, Error::ASSIGNED_TO_CONST_OR_PROC);
+			Error::raise(cur.line, Error::ASSIGNED_TO_CONST_OR_PROC);
 		}
 		else {
-			emit(inst::WRT, lev - table[pos].level, table[pos].address); //把栈顶元素写入指定位置
+			emit(Instruction::WRT, lev - table[pos].level, table[pos].address); //把栈顶元素写入指定位置
 		}
 
 		read();
@@ -660,11 +637,11 @@ void GrammarAnalyzer::WRITE_STATEMENT()
 	confirmName("(");
 	read();
 	EXPRESSION();
-	emit(inst::WRT, 0, 1);
+	emit(Instruction::WRT, 0, 1);
 	while (cur.name == ",") {
 		read();
 		EXPRESSION();
-		emit(inst::WRT, 0, 1);
+		emit(Instruction::WRT, 0, 1);
 	}
 	confirmName(")");
 	read();
@@ -688,7 +665,7 @@ void GrammarAnalyzer::REPEAT_STATEMENT()
 	read();
 	CONDITION();
 
-	emit(inst::JPC, 0, statemetn_cx);
+	emit(Instruction::JPC, 0, statemetn_cx);
 
 }
 
@@ -782,7 +759,7 @@ void GrammarAnalyzer::printPcodes()
 {
 	std::cout << endl;
 	for (int i = 0; i < (int)pcodes.size(); i++) {
-		std::cout << i+1 << "\t" << inst::translator[pcodes[i].op] << "\t" << pcodes[i].l << "\t" << pcodes[i].m << std::endl;
+		std::cout << i+1 << "\t" << Instruction::translator[pcodes[i].op] << "\t" << pcodes[i].l << "\t" << pcodes[i].m << std::endl;
 	}
 }
 
@@ -808,7 +785,7 @@ bool GrammarAnalyzer::test(int line, Word::WordType word_type, Error::ErrorType 
 		return true;
 	}
 	else {
-		my_raise(line, error_type);
+		Error::raise(line, error_type);
 		std::cout << "\t " << Word::translator[word_type] << " expected" << std::endl;
 		return false;
 	}

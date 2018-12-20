@@ -32,16 +32,14 @@ public:
 		TOO_BIG_NUMBER,
 		EXPECT_LEFT_PARENTHSIS,
 		EXPECT_ASSIGN,
-		MISSING,
+		EXPECT,
 		UNEXPECTED,
 	};
 
 	Error();
 	~Error();
-	static void my_error_raise(int line, ErrorType errorType);
-	static void raiseError(int line, ErrorType errorType, std::string errorInfo);
+	static void raise(int line, ErrorType errorType);
 	static void raiseMissingError(int line, std::string missingStr);
-	static void raiseUnexpectedError(int line, std::string unexpectedInfo);
-	static void raiseSimpleError(int line, std::string info);
+	//static void raise(int line, ErrorType errorType, std::string readWord, Word::WordType expectedType);
 };
 
