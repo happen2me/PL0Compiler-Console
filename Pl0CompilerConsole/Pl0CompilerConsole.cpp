@@ -3,19 +3,29 @@
 
 #include "pch.h"
 #include <iostream>
+#include <vector>
 #include "WordAnalyzer.h"
 #include "GrammarAnalyzer.h"
 #include "Interpreter.h"
+using namespace std;
 
 int main()
 {
+	
 	try {
-		WordAnalyzer wordAnalyzer("code_samples/right1.pl0");
+		WordAnalyzer wordAnalyzer("code_samples/simple_call.pl0");
 		wordAnalyzer.analyze();
 		wordAnalyzer.printResult();
 		GrammarAnalyzer grammarAnalyzer(wordAnalyzer.getResult());
 		grammarAnalyzer.runCompile();
 		Interpreter interpreter(grammarAnalyzer.getResults());
+		/*int op, l, m;
+		vector<Instruction> instructions;
+		while (cin >> op >> l >> m)
+		{
+			instructions.push_back(Instruction((Instruction::InstructionType) op, l, m));
+		}
+		Interpreter interpreter(instructions);*/
 		interpreter.run();
 	}
 	catch (const std::exception e) {

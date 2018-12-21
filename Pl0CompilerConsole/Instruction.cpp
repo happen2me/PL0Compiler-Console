@@ -13,7 +13,25 @@ std::map<Instruction::InstructionType, std::string> Instruction::translator = {
 	{Instruction::JMP, "JMP"},// JMP	0, M	Jump to instruction M
 	{Instruction::JPC, "JPC"},// JPC	0, M	Jump to instruction M if top stack element is 0
 	{Instruction::WRT, "WRT"},// WRT	0, 1	Write the top stack element to the screen
-	{Instruction::RED, "RED"}
+	{Instruction::RED, "RED"},
+
+};
+
+std::map<Instruction::OperationType, std::string> Instruction::op_translator = {
+	{Instruction::OT_RET, "RET"},
+	{Instruction::OT_NEG, "NEG"},
+	{Instruction::OT_ADD, "ADD"},
+	{Instruction::OT_SUB, "SUB"},
+	{Instruction::OT_MUL, "MUL"},
+	{Instruction::OT_DIV, "DIV"},
+	{Instruction::OT_ODD, "ODD"},
+	{Instruction::OT_MOD, "MOD"},
+	{Instruction::OT_EQL, "EQL"},
+	{Instruction::OT_NEQ, "NEQ"},
+	{Instruction::OT_LSS, "LSS"},
+	{Instruction::OT_LEQ, "LEG"},
+	{Instruction::OT_GTR, "GTR"},
+	{Instruction::OT_GEQ, "GEQ"}
 };
 
 Instruction::Instruction()

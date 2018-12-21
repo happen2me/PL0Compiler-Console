@@ -38,6 +38,7 @@ public:
 	};
 
 	static std::map<InstructionType, std::string> translator;
+	static std::map<OperationType, std::string> op_translator;
 
 	Instruction();
 	Instruction(InstructionType type, int l, int m);

@@ -28,5 +28,6 @@ private:
 	void push(int x);
 	int pop();
 	bool fetch(); // fetch an instruction into ir
+	void snapshotStack();
 };
 

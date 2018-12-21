@@ -742,7 +742,13 @@ void GrammarAnalyzer::printPcodes()
 {
 	std::cout << endl;
 	for (int i = 0; i < (int)pcodes.size(); i++) {
-		std::cout << i << "\t" << Instruction::translator[pcodes[i].op] << "\t" << pcodes[i].l << "\t" << pcodes[i].m << std::endl;
+		std::cout << i << "\t" << Instruction::translator[pcodes[i].op] << "\t" << pcodes[i].l << "\t";
+		if (pcodes[i].op == Instruction::OPR) {
+			std::cout << Instruction::op_translator[(Instruction::OperationType)pcodes[i].m] << std::endl;
+		}
+		else {
+			std::cout << pcodes[i].m << std::endl;
+		}
 	}
 }
 

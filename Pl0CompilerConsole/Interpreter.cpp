@@ -22,9 +22,20 @@ Interpreter::~Interpreter()
 
 void Interpreter::run()
 {
-	while (bp != 0 && fetch()) {
-		exe();
+	int time = 100;
+	std::cout << "\nop\tl\tm\tpc\tbp\tsp\tstack(before execution)" << std::endl;
+	while (bp != 0 && time > 0) {
+		time--;
+		fetch();	
+		snapshotStack();
+		exe();			
 	}
+	std::cout << "\t\t\t";
+	std::cout << pc << "\t" << bp << "\t" << sp << "\t";
+	for (int i = 0; i <= sp; i++) {
+		std::cout << data[i] << " ";
+	}
+	std::cout << std::endl;
 }
 
 void Interpreter::exe()
@@ -44,9 +55,11 @@ void Interpreter::exe()
 		data[base(bp, ir.l) + ir.m] = pop();
 		break;
 	case Instruction::CALL:
-		push(base(bp, ir.l)); // static link
-		push(bp); // dynamic link
-		push(pc); // pc points to next instruction to execute
+		data[sp + 1] = base(bp, ir.l); // static link
+		data[sp + 2] = bp; // dynamic link
+		data[sp + 3] = pc; // pc points to next instruction to execute
+		pc = ir.m;
+		bp = sp + 1; // bp moves to the top of original stack pointer
 		break;
 	case Instruction::INC:
 		sp += ir.m;
@@ -68,6 +81,7 @@ void Interpreter::exe()
 		push(x);
 		break;
 	default:
+		std::cerr << "undefined operater type" << std::endl;
 		break;
 	}
 }
@@ -78,10 +92,10 @@ void Interpreter::opr(Instruction::OperationType opr_type)
 	switch (opr_type)
 	{
 	case Instruction::OT_RET:
-		pc = data[bp + 2];
+		pc = data[bp + 2]; // return address
 		stored_bp = bp;
-		bp = bp + 1;
-		sp = stored_bp - 1;
+		bp = data[bp + 1]; //dynamic link
+		sp = stored_bp - 1; // original stack pointer
 		break;
 	case Instruction::OT_NEG:
 		push(-pop());
@@ -178,4 +192,19 @@ bool Interpreter::fetch()
 	ir = instructions[pc];
 	pc++;
 	return true;
+}
+
+void Interpreter::snapshotStack()
+{
+	if (ir.op == Instruction::OPR) {
+		std::cout << Instruction::translator[ir.op] << "\t" << ir.l << "\t" << Instruction::op_translator[(Instruction::OperationType)ir.m] << "\t";
+	}
+	else {
+		std::cout << Instruction::translator[ir.op] << "\t" << ir.l << "\t" << ir.m << "\t";
+	}
+	std::cout << pc << "\t" << bp << "\t" << sp << "\t";
+	for (int i = 0; i <= sp; i++) {
+		std::cout << data[i] << " ";
+	}
+	std::cout << std::endl;
 }

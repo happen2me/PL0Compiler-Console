@@ -1,0 +1,15 @@
+const a=21, b = 3;
+var c;
+procedure add;
+    var a, b, d;
+    begin
+        a:=1;
+        b:=2;
+        d:=a+b
+        write(d);
+    end;    
+begin
+    c:=a+b;
+    write(c);
+    call add
+end.
