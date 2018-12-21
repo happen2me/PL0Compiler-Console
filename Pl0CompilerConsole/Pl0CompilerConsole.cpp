@@ -11,14 +11,14 @@ using namespace std;
 
 int main()
 {
-	
+
 	try {
 		WordAnalyzer wordAnalyzer("code_samples/corrected.pl0");
 		wordAnalyzer.analyze();
 		//wordAnalyzer.printResult();
 		GrammarAnalyzer grammarAnalyzer(wordAnalyzer.getResult());
-		grammarAnalyzer.runCompile();	
-		
+		grammarAnalyzer.runCompile();
+
 		ofstream myfile;
 		myfile.open("output/pcodes.txt");
 		grammarAnalyzer.printPcodes(myfile);
@@ -39,8 +39,8 @@ int main()
 	catch (const std::exception e) {
 		std::cerr << e.what() << std::endl;
 	}
-	
-	
+
+
 	return 0;
 }
 

@@ -7,7 +7,7 @@ Interpreter::Interpreter()
 {
 }
 
-Interpreter::Interpreter(std::vector<Instruction> pcodes):
+Interpreter::Interpreter(std::vector<Instruction> pcodes) :
 	instructions(pcodes),
 	pc(0),
 	bp(1),
@@ -29,7 +29,7 @@ void Interpreter::run()
 		fetch();
 		std::cout << time << "\t";
 		snapshotStack(std::cout);
-		exe();			
+		exe();
 	}
 	std::cout << "\t\t\t\t";
 	std::cout << pc << "\t" << bp << "\t" << sp << "\t";
@@ -50,7 +50,7 @@ void Interpreter::exe()
 		opr((Instruction::OperationType)ir.m);
 		break;
 	case Instruction::LOD:
-		push(data[base(bp, ir.l)+ir.m]);
+		push(data[base(bp, ir.l) + ir.m]);
 		break;
 	case Instruction::STO:
 		data[base(bp, ir.l) + ir.m] = pop();

@@ -16,12 +16,12 @@ public:
 
 private:
 	std::vector<Instruction> instructions;
-	int data[MAX_RUN_STACK_HEIGHT] = {0, };
+	int data[MAX_RUN_STACK_HEIGHT] = { 0, };
 	int pc; // program vounter
 	int bp; // base pointer
 	int sp; // stack pointer
 	Instruction ir; // instruction register
-	
+
 	void exe();
 	void opr(Instruction::OperationType opr_type);
 	int base(int b_ptr, int level);

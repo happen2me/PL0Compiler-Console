@@ -22,7 +22,7 @@ GrammarAnalyzer::GrammarAnalyzer()
 {
 }
 
-GrammarAnalyzer::GrammarAnalyzer(const std::vector<Word>& wordList):
+GrammarAnalyzer::GrammarAnalyzer(const std::vector<Word>& wordList) :
 	wordStack(),
 	errorCnt(0)
 {
@@ -30,7 +30,7 @@ GrammarAnalyzer::GrammarAnalyzer(const std::vector<Word>& wordList):
 		wordStack.push(wordList[i]);
 		if (DEBUG && VERBOSE) {
 			std::cout << "pushed " << wordStack.top().name << std::endl;
-		}		
+		}
 	}
 }
 
@@ -51,7 +51,7 @@ bool GrammarAnalyzer::read()
 		if (VERBOSE) {
 			std::cout << "Read word " << cur.name << ": " << cur.val << std::endl;
 		}
-		
+
 		wordStack.pop();
 		if (!wordStack.empty()) {
 			nextWord = wordStack.top();
@@ -65,7 +65,7 @@ bool GrammarAnalyzer::read()
 		cur = Word::CreateEmptyWord();
 		return false;
 	}
-		
+
 }
 
 void GrammarAnalyzer::runCompile()
@@ -80,7 +80,7 @@ void GrammarAnalyzer::MAIN_PROC()
 	lev = -1;
 	try {
 		SUB_PROC();
-		
+
 		if (!checkType(Word::SP_DOT)) {
 			raiseWrapper(cur.line, Error::EXPECT_DOT_AT_END);
 		}
@@ -95,7 +95,7 @@ void GrammarAnalyzer::MAIN_PROC()
 	}
 	else {
 		std::cerr << "\nThere are still " << wordStack.size() << " words remains in statck" << std::endl;
-		std::cerr << "cur is in line " << cur.line+1 << std::endl;
+		std::cerr << "cur is in line " << cur.line + 1 << std::endl;
 	}
 }
 
@@ -128,9 +128,9 @@ void GrammarAnalyzer::SUB_PROC()
 	pcodes[stored_cx].m = getCx();
 
 	if (lev > 0) {
-		table[stored_tx-1].address = getCx();
+		table[stored_tx - 1].address = getCx();
 	}
-	
+
 
 	emit(Instruction::INC, 0, dx); // space for var
 
@@ -175,12 +175,12 @@ void GrammarAnalyzer::STATEMENT()
 //<表达式>::=[+|-]<项>{<加法运算符><项>}
 void GrammarAnalyzer::EXPRESSION()
 {
-	std::set<Word::WordType> expression_first = {Word::OP_PLUS, Word::OP_MINUS, Word::SP_LEFT_PAR, Word::IDENTIFIER, Word::CONST};
-	
+	std::set<Word::WordType> expression_first = { Word::OP_PLUS, Word::OP_MINUS, Word::SP_LEFT_PAR, Word::IDENTIFIER, Word::CONST };
+
 	if (expression_first.count(cur.type) == 0) {
 		raiseWrapper(cur.line, Error::INCORECT_SYMBOL_LEADS_EXPRESSION);
 	}
-	
+
 	bool neg_start = false;
 	if (cur.name == "+" || cur.name == "-") {
 		neg_start = checkType(Word::OP_MINUS);
@@ -269,7 +269,7 @@ void GrammarAnalyzer::FACTOR()
 			if (table[pos].type == Symbol::CONST) {
 				emit(Instruction::LIT, 0, table[pos].val);
 			}
-			else if(table[pos].type == Symbol::VAR){
+			else if (table[pos].type == Symbol::VAR) {
 				emit(Instruction::LOD, lev - table[pos].level, table[pos].address);
 			}
 			else {
@@ -305,7 +305,7 @@ void GrammarAnalyzer::TERM()
 
 		read();
 		FACTOR();
-		
+
 		if (is_multiply) {
 			emit(Instruction::OPR, 0, Instruction::OT_MUL);
 		}
@@ -337,7 +337,7 @@ void GrammarAnalyzer::CONST_DEFINITION()
 	confirm(Word::IDENTIFIER);
 	std::string const_name = cur.name;
 	read();
-	
+
 	if (checkType(Word::OP_ASSIGN)) {
 		raiseWrapper(cur.line, Error::USE_EQUAL_INSTEAD_OF_ASSIGN);
 		read();
@@ -346,7 +346,7 @@ void GrammarAnalyzer::CONST_DEFINITION()
 		confirm(Word::OP_EQUAL);
 		read();
 	}
-	
+
 	confirm(Word::CONST);
 
 	enter(Symbol::CONST, const_name, cur.val);
@@ -374,8 +374,8 @@ void GrammarAnalyzer::VAR_DECLARATION(int& dx)
 			break;
 		}
 	}
-	
-	
+
+
 	if (dx == 3) { //means no var added
 		raiseWrapper(cur.line, Error::SHOULD_BE_FOLLOWED_BY_IDENTIFIRE);
 	}
@@ -386,7 +386,7 @@ void GrammarAnalyzer::VAR_DECLARATION(int& dx)
 	else {
 		raiseWrapper(cur.line, Error::MISSING_COMMA_OR_SEMICOLON);
 	}
-	
+
 }
 
 //<过程说明部分> ::= procedure<标识符>;<分程序>;{<过程说明部分>}
@@ -402,7 +402,7 @@ void GrammarAnalyzer::PROCEDURE_DECLARATION()
 		raiseWrapper(cur.line, Error::SHOULD_BE_FOLLOWED_BY_IDENTIFIRE);
 	}
 	read();
-	
+
 	if (checkType(Word::SP_SEMICOLON)) {
 		read();
 	}
@@ -428,7 +428,7 @@ void GrammarAnalyzer::PROCEDURE_DECLARATION()
 // <赋值语句>::=<标识符>:=<表达式>
 void GrammarAnalyzer::ASSIGNMENT_STATEMENT()
 {
-	
+
 	confirm(Word::IDENTIFIER);
 
 	int pos = position(cur.name, lev);
@@ -436,7 +436,7 @@ void GrammarAnalyzer::ASSIGNMENT_STATEMENT()
 	if (pos == NOT_FOUND) {
 		raiseWrapper(cur.line, Error::UNDECLARED_IDENTIFIER);
 	}
-	else if(table[pos].type == Symbol::PROC || table[pos].type == Symbol::CONST){
+	else if (table[pos].type == Symbol::PROC || table[pos].type == Symbol::CONST) {
 		raiseWrapper(cur.line, Error::ASSIGNED_TO_CONST_OR_PROC);
 	}
 
@@ -456,7 +456,7 @@ void GrammarAnalyzer::ASSIGNMENT_STATEMENT()
 	read();
 	if (DEBUG && VERBOSE) {
 		cout << "!!!! cur.type is " << Word::translator[cur.type] << " name is " << cur.name << endl;
-	}	
+	}
 
 	EXPRESSION();
 	if (pos != NOT_FOUND && table[pos].type == Symbol::VAR) {
@@ -534,7 +534,7 @@ void GrammarAnalyzer::WHILE_STATEMENT()
 	if (DEBUG && VERBOSE) {
 		std::cout << "before do  cur is " << cur.name << std::endl;
 	}
-	
+
 	STATEMENT();
 
 	emit(Instruction::JMP, 0, condition_cx);
@@ -565,7 +565,7 @@ void GrammarAnalyzer::CALL_STATEMENT()
 
 		read();
 	}
-	
+
 }
 
 //<读语句>::=read'('<标识符>{,<标识符>}')'
@@ -590,9 +590,9 @@ void GrammarAnalyzer::READ_STATEMENT()
 		int pos = position(cur.name, lev);
 
 		if (pos == NOT_FOUND) {
-			raiseWrapper(cur.line, Error::UNDECLARED_IDENTIFIER);			
+			raiseWrapper(cur.line, Error::UNDECLARED_IDENTIFIER);
 		}
-		else if(table[pos].type == Symbol::CONST || table[pos].type == Symbol::PROC){
+		else if (table[pos].type == Symbol::CONST || table[pos].type == Symbol::PROC) {
 			raiseWrapper(cur.line, Error::ASSIGNED_TO_CONST_OR_PROC);
 		}
 		else {
@@ -642,7 +642,7 @@ void GrammarAnalyzer::REPEAT_STATEMENT()
 	STATEMENT();
 	while (cur.name == ";") {
 		read();
-		STATEMENT();		
+		STATEMENT();
 	}
 	confirm(Word::KW_UNTIL);
 	read();
@@ -696,7 +696,7 @@ void GrammarAnalyzer::enter(Symbol::SymbolType type, std::string name, int level
 
 bool GrammarAnalyzer::checkDup(std::string name, int level)
 {
-	for (int i = table.size()-1; i >= 0; i--) {
+	for (int i = table.size() - 1; i >= 0; i--) {
 		if (table[i].name == name && table[i].level == level) {
 			return true;
 		}
@@ -730,7 +730,7 @@ void GrammarAnalyzer::printSymbolTable(std::ostream& out)
 			out.width(8);
 			out << std::left << "-" << std::endl;
 		}
-		else {			
+		else {
 			out << std::left << "-";
 			out.width(8);
 			out << std::left << table[i].level;

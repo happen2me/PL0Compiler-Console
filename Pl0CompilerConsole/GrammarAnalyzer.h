@@ -61,7 +61,7 @@ private:
 	void enter(Symbol::SymbolType type, std::string name, int level, int address); // enter var and proc
 	bool checkDup(std::string name, int level);
 	int find(std::string name); // return -1 if not find
-		
+
 	int position(std::string identifier, int level);
 	int getTx();
 	int getCx();
