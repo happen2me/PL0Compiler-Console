@@ -14,6 +14,9 @@ public:
 	virtual ~GrammarAnalyzer();
 	void runCompile();
 	std::vector<Instruction> getResults();
+	bool errorHappened();
+	void printSymbolTable(std::ostream& out);
+	void printPcodes(std::ostream& out);
 
 private:
 	std::stack<Word> wordStack;
@@ -58,13 +61,12 @@ private:
 	void enter(Symbol::SymbolType type, std::string name, int level, int address); // enter var and proc
 	bool checkDup(std::string name, int level);
 	int find(std::string name); // return -1 if not find
-
-	void printSymbolTable();
-	void printPcodes();
+		
 	int position(std::string identifier, int level);
 	int getTx();
 	int getCx();
 	bool test(int line, Word::WordType word_type, Error::ErrorType error_type);
-	
+	void raiseWrapper(int line, Error::ErrorType errorType);
+	void raiseWrapper(int line, Error::ErrorType errorType, std::string expectation);
 };
 

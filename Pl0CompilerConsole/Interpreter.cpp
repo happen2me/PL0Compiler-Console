@@ -22,15 +22,16 @@ Interpreter::~Interpreter()
 
 void Interpreter::run()
 {
-	int time = 100;
+	int time = 0;
 	std::cout << "\nop\tl\tm\tpc\tbp\tsp\tstack(before execution)" << std::endl;
-	while (bp != 0 && time > 0) {
-		time--;
-		fetch();	
+	while (bp != 0 && time < 3000) {
+		time++;
+		fetch();
+		std::cout << time << "\t";
 		snapshotStack();
 		exe();			
 	}
-	std::cout << "\t\t\t";
+	std::cout << "\t\t\t\t";
 	std::cout << pc << "\t" << bp << "\t" << sp << "\t";
 	for (int i = 0; i <= sp; i++) {
 		std::cout << data[i] << " ";

@@ -13,12 +13,17 @@ int main()
 {
 	
 	try {
-		WordAnalyzer wordAnalyzer("code_samples/simple_call.pl0");
+		WordAnalyzer wordAnalyzer("code_samples/corrected.pl0");
 		wordAnalyzer.analyze();
-		wordAnalyzer.printResult();
+		//wordAnalyzer.printResult();
 		GrammarAnalyzer grammarAnalyzer(wordAnalyzer.getResult());
-		grammarAnalyzer.runCompile();
-		Interpreter interpreter(grammarAnalyzer.getResults());
+		grammarAnalyzer.runCompile();	
+		
+		ofstream myfile;
+		myfile.open("output/pcodes.txt");
+		grammarAnalyzer.printPcodes(myfile);
+		myfile.close();
+
 		/*int op, l, m;
 		vector<Instruction> instructions;
 		while (cin >> op >> l >> m)
@@ -26,7 +31,10 @@ int main()
 			instructions.push_back(Instruction((Instruction::InstructionType) op, l, m));
 		}
 		Interpreter interpreter(instructions);*/
-		interpreter.run();
+		if (!grammarAnalyzer.errorHappened()) {
+			Interpreter interpreter(grammarAnalyzer.getResults());
+			interpreter.run();
+		}
 	}
 	catch (const std::exception e) {
 		std::cerr << e.what() << std::endl;

@@ -39,6 +39,5 @@ public:
 	Error();
 	~Error();
 	static void raise(int line, ErrorType errorType);
-	static void raiseMissingError(int line, std::string missingStr);
 };
 

@@ -1,0 +1,10 @@
+const a=21;
+var b;
+begin
+    b:=3;
+    while b>0 do
+    begin
+        write(b);
+        b:=b-1
+    end
+end.

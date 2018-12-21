@@ -1,0 +1,7 @@
+const a=21, b = 28;
+begin
+    if a > b then
+	    write(a)
+    else
+        write(b)    
+end.
