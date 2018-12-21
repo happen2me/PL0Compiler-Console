@@ -38,18 +38,13 @@ procedure gcd;
 		while f<>g do
 		begin
 			if f<g then g:=g-f;
- 			if g<f then g:=f-g;
-			z:=f
+ 			if g<f then f:=f-g;
+			z:=f			
 		end
 	end;
-begin
-	x:=3;
-	y:=4;
-	call multiply;
-	x:=25;
-	y:=3;
-	call divide;
+begin	
 	x:=84;
 	y:=36;
-	call gcd
+	call gcd;
+	write(z)
 end.

@@ -596,7 +596,7 @@ void GrammarAnalyzer::READ_STATEMENT()
 			raiseWrapper(cur.line, Error::ASSIGNED_TO_CONST_OR_PROC);
 		}
 		else {
-			emit(Instruction::WRT, lev - table[pos].level, table[pos].address); //把栈顶元素写入指定位置
+			emit(Instruction::STO, lev - table[pos].level, table[pos].address); //把栈顶元素写入指定位置
 		}
 
 		read();

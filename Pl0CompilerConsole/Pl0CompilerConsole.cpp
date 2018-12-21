@@ -13,6 +13,7 @@ int main()
 {
 
 	try {
+		
 		WordAnalyzer wordAnalyzer("code_samples/corrected.pl0");
 		wordAnalyzer.analyze();
 		//wordAnalyzer.printResult();
@@ -23,7 +24,8 @@ int main()
 		myfile.open("output/pcodes.txt");
 		grammarAnalyzer.printPcodes(myfile);
 		myfile.close();
-
+		grammarAnalyzer.printSymbolTable(std::cout);
+		grammarAnalyzer.printPcodes(std::cout);
 		/*int op, l, m;
 		vector<Instruction> instructions;
 		while (cin >> op >> l >> m)

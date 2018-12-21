@@ -1,0 +1,13 @@
+const a=21, b = 3;
+var c;
+procedure add;
+    const a=10, b=11;
+	begin 
+        if a<>b then
+		    c:=a+a*b;
+            c:= c / 3;
+	end;
+begin
+    call add;
+	write(c)
+end.

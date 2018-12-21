@@ -3,6 +3,8 @@
 #include <iostream>
 #include "Interpreter.h"
 
+#define DEBUG 0
+
 Interpreter::Interpreter()
 {
 }
@@ -23,20 +25,27 @@ Interpreter::~Interpreter()
 void Interpreter::run()
 {
 	int time = 0;
-	std::cout << "\nop\tl\tm\tpc\tbp\tsp\tstack(before execution)" << std::endl;
-	while (bp != 0 && time < 3000) {
+	if(DEBUG)
+		std::cout << "\nline\top\tl\tm\tpc\tbp\tsp\tstack(before execution)" << std::endl;
+	while (bp != 0 && time < 100) {
 		time++;
 		fetch();
-		std::cout << time << "\t";
-		snapshotStack(std::cout);
+		
+		if (DEBUG) {
+			std::cout << time << "\t";
+			snapshotStack(std::cout);
+		}
 		exe();
 	}
-	std::cout << "\t\t\t\t";
-	std::cout << pc << "\t" << bp << "\t" << sp << "\t";
-	for (int i = 0; i <= sp; i++) {
-		std::cout << data[i] << " ";
+	if (DEBUG) {
+		std::cout << "\t\t\t\t";
+		std::cout << pc << "\t" << bp << "\t" << sp << "\t";
+		for (int i = 0; i <= sp; i++) {
+			std::cout << data[i] << " ";
+		}
+		std::cout << std::endl;
 	}
-	std::cout << std::endl;
+	
 }
 
 void Interpreter::exe()
@@ -74,7 +83,8 @@ void Interpreter::exe()
 		}
 		break;
 	case Instruction::WRT:
-		std::cout << pop() << std::endl;
+		std::cout << "\033[1;33m";
+		std::cout << pop() << "\033[0m\n" << std::endl;
 		break;
 	case Instruction::RED:
 		int x;
