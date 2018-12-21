@@ -190,23 +190,23 @@ WordAnalyzer::~WordAnalyzer()
 {
 }
 
-void WordAnalyzer::printResult() {
-	std::cout << std::endl;
-	std::cout.width(12);
-	std::cout << std::left << "Name";
-	std::cout.width(15);
-	std::cout << std::left << "Type";
-	std::cout << std::left << "Value" << std::endl;
+void WordAnalyzer::printResult(std::ostream& out) {
+	out << std::endl;
+	out.width(12);
+	out << std::left << "Name";
+	out.width(15);
+	out << std::left << "Type";
+	out << std::left << "Value" << std::endl;
 	for (int i = 0; i < (int)results.size(); i++) {
-		std::cout.width(12);
-		std::cout << std::left << results[i].name;
-		std::cout.width(15);
-		std::cout << Word::translator[results[i].type];
+		out.width(12);
+		out << std::left << results[i].name;
+		out.width(15);
+		out << Word::translator[results[i].type];
 		if (results[i].type == Word::CONST) {
-			std::cout << std::left << results[i].val << std::endl;
+			out << std::left << results[i].val << std::endl;
 		}
 		else {
-			std::cout << std::left << "-" << std::endl;
+			out << std::left << "-" << std::endl;
 		}
 	}
 }

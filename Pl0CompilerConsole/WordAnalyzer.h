@@ -69,7 +69,7 @@ public:
 		return buffer;
 	}
 
-	void printResult();
+	void printResult(std::ostream& out);
 
 	std::vector<std::string> typesName = { "IDENTIFIER",	"RESERVED",	"CONST", "UNARY_OPERATOR", "BINARY_OPERATOR", "SEPERATOR" };
 private:

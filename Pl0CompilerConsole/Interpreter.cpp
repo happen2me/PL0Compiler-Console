@@ -28,7 +28,7 @@ void Interpreter::run()
 		time++;
 		fetch();
 		std::cout << time << "\t";
-		snapshotStack();
+		snapshotStack(std::cout);
 		exe();			
 	}
 	std::cout << "\t\t\t\t";
@@ -195,17 +195,17 @@ bool Interpreter::fetch()
 	return true;
 }
 
-void Interpreter::snapshotStack()
+void Interpreter::snapshotStack(std::ostream& out)
 {
 	if (ir.op == Instruction::OPR) {
-		std::cout << Instruction::translator[ir.op] << "\t" << ir.l << "\t" << Instruction::op_translator[(Instruction::OperationType)ir.m] << "\t";
+		out << Instruction::translator[ir.op] << "\t" << ir.l << "\t" << Instruction::op_translator[(Instruction::OperationType)ir.m] << "\t";
 	}
 	else {
-		std::cout << Instruction::translator[ir.op] << "\t" << ir.l << "\t" << ir.m << "\t";
+		out << Instruction::translator[ir.op] << "\t" << ir.l << "\t" << ir.m << "\t";
 	}
-	std::cout << pc << "\t" << bp << "\t" << sp << "\t";
+	out << pc << "\t" << bp << "\t" << sp << "\t";
 	for (int i = 0; i <= sp; i++) {
-		std::cout << data[i] << " ";
+		out << data[i] << " ";
 	}
-	std::cout << std::endl;
+	out << std::endl;
 }
