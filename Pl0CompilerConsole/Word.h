@@ -52,7 +52,6 @@ public:
 
 	Word(int line, std::string name, WordType type, int val);
 	Word(int line, std::string name, WordType type);
-	//Word(int line, std::string name, WordType type, std::string val);
 	Word();
 	~Word();
 
@@ -71,9 +70,9 @@ public:
 	static std::map<Word::WordType, std::string> translator;
 
 private:
-	bool emptyWord;
-	static std::set<WordType> operaterSet;
-	static std::set<WordType> separatorSet;
-	static std::set<WordType> reservedSet;
+	bool empty_word;
+	static std::set<WordType> operater_set;
+	static std::set<WordType> separator_set;
+	static std::set<WordType> reserved_set;
 };
 

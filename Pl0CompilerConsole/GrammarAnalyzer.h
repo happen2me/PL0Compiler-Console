@@ -19,14 +19,14 @@ public:
 	void printPcodes(std::ostream& out);
 
 private:
-	std::stack<Word> wordStack;
-	Word cur;
-	Word nextWord;
-	/*For Translate*/
+	std::stack<Word> word_stack;
+	Word current_word;
+	Word next_word; // In fact it's never been used
+	/*For parsing stage*/
 	std::vector<Symbol> table; //·ûºÅ±í
 	std::vector<Instruction> pcodes;
 	int lev;
-	int errorCnt;
+	int error_count;
 	void emit(Instruction::InstructionType type, int l, int m);
 
 	bool read();

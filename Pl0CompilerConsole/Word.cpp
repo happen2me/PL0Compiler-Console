@@ -42,7 +42,7 @@ std::map<Word::WordType, std::string> Word::translator = {
 };
 
 
-std::set<Word::WordType> Word::operaterSet = {
+std::set<Word::WordType> Word::operater_set = {
 	OP_ASSIGN,
 	OP_PLUS,
 	OP_MINUS,
@@ -57,7 +57,7 @@ std::set<Word::WordType> Word::operaterSet = {
 	OP_ABOVE_EQUAL,
 };
 
-std::set<Word::WordType> Word::separatorSet = {
+std::set<Word::WordType> Word::separator_set = {
 	SP_LEFT_PAR, // (
 	SP_RIGHT_PAR, // )
 	SP_COMMA, // ,
@@ -66,7 +66,7 @@ std::set<Word::WordType> Word::separatorSet = {
 	SP_DOT // .
 };
 
-std::set<Word::WordType> Word::reservedSet = {
+std::set<Word::WordType> Word::reserved_set = {
 	KW_BEGIN,
 	KW_END,
 	KW_IF,
@@ -86,7 +86,7 @@ std::set<Word::WordType> Word::reservedSet = {
 };
 
 Word::Word() :
-	emptyWord(true)
+	empty_word(true)
 {
 }
 
@@ -94,7 +94,7 @@ Word::Word() :
 Word::Word(int line, std::string name, WordType type, int val) :
 	name(name),
 	type(type),
-	emptyWord(false),
+	empty_word(false),
 	line(line),
 	val(val)
 {
@@ -103,7 +103,7 @@ Word::Word(int line, std::string name, WordType type, int val) :
 Word::Word(int line, std::string name, WordType type) :
 	name(name),
 	type(type),
-	emptyWord(false),
+	empty_word(false),
 	line(line),
 	val(0)
 {
@@ -128,12 +128,12 @@ Word Word::CreateEmptyWord()
 
 bool Word::isEmptyWord()
 {
-	return emptyWord;
+	return empty_word;
 }
 
 bool Word::isOperator()
 {
-	return operaterSet.find(type) != operaterSet.end();
+	return operater_set.find(type) != operater_set.end();
 }
 
 bool Word::isRetionalOperator()
@@ -157,10 +157,10 @@ bool Word::isRetionalOperator()
 
 bool Word::isSeperator()
 {
-	return separatorSet.count(type) != 0;
+	return separator_set.count(type) != 0;
 }
 
 bool Word::isReserved()
 {
-	return reservedSet.count(type) != 0;
+	return reserved_set.count(type) != 0;
 }

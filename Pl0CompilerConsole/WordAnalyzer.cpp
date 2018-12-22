@@ -3,6 +3,29 @@
 #include <exception>
 #include <iostream>
 
+std::map<std::string, Word::WordType> WordAnalyzer::reserved_word_map = {
+	{"begin", Word::KW_BEGIN},
+	{"end", Word::KW_END},
+	{"if", Word::KW_IF},
+	{"then", Word::KW_THEN},
+	{"else", Word::KW_ELSE},
+	{"const", Word::KW_CONST},
+	{"procedure", Word::KW_PROCEDURE},
+	{"var", Word::KW_VAR},
+	{"do", Word::KW_DO},
+	{"while", Word::KW_WHILE},
+	{"call", Word::KW_CALL},
+	{"read", Word::KW_READ},
+	{"write", Word::KW_WRITE},
+	{"odd", Word::KW_ODD},
+	{"repeat", Word::KW_REPEAT},
+	{"until", Word::KW_UNTIL}
+};
+
+std::vector<std::string> WordAnalyzer::reserved_words = { "begin", "end", "if", "then", "else", "const", "procedure", "var", "do", "while", "call", "read", "write", "odd", "repeat", "until" };
+
+std::vector<std::string> WordAnalyzer::types_name = { "IDENTIFIER",	"RESERVED",	"CONST", "UNARY_OPERATOR", "BINARY_OPERATOR", "SEPERATOR" };
+
 WordAnalyzer::WordAnalyzer()
 {
 }
@@ -141,12 +164,12 @@ void WordAnalyzer::retract()
 
 Word::WordType WordAnalyzer::reserver()
 {
-	/*for (size_t i = 0; i < reservedWords.size(); i++) {
-		if (token == reservedWords[i])
+	/*for (size_t i = 0; i < reserved_words.size(); i++) {
+		if (token == reserved_words[i])
 			return Word::RESERVED;
 	}*/
-	std::map<std::string, Word::WordType>::iterator it = reservedWordMap.find(token);
-	if (it != reservedWordMap.end()) {
+	std::map<std::string, Word::WordType>::iterator it = reserved_word_map.find(token);
+	if (it != reserved_word_map.end()) {
 		return it->second;
 	}
 	return Word::IDENTIFIER;
@@ -188,6 +211,11 @@ std::vector<Word> WordAnalyzer::getResult()
 
 WordAnalyzer::~WordAnalyzer()
 {
+}
+
+std::string WordAnalyzer::getBuffer()
+{
+	return buffer;
 }
 
 void WordAnalyzer::printResult(std::ostream& out) {
