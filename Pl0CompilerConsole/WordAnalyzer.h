@@ -31,7 +31,7 @@ private:
 	std::string buffer;
 	int readPtr;
 	std::vector<Word> results;
-	int lineCounter;
+	int line_counter;
 
 	char getchar();
 	void clearToken();

@@ -35,7 +35,7 @@ WordAnalyzer::WordAnalyzer(std::string filename) :
 	token(""),
 	num(0),
 	readPtr(0),
-	lineCounter(1)
+	line_counter(1)
 {
 	readFile(filename);
 }
@@ -264,7 +264,7 @@ Word WordAnalyzer::identifyWord()
 	while (isSpace() || isNewLine() || isTab())
 	{
 		if (ch == '\n')
-			lineCounter++;
+			line_counter++;
 		getchar();
 	}
 
@@ -293,7 +293,7 @@ Word WordAnalyzer::identifyWord()
 				getchar();
 			}
 			retract();
-			error("Identifier should not start with digit; at line " + lineCounter);
+			error("Identifier should not start with digit; at line " + line_counter);
 			return Word();
 		}
 		retract();
@@ -302,9 +302,9 @@ Word WordAnalyzer::identifyWord()
 
 		// TODO float
 		if (isFloat) {
-			return Word(lineCounter, token, Word::CONST, numVal);
+			return Word(line_counter, token, Word::CONST, numVal);
 		}
-		return Word(lineCounter, token, Word::CONST, numVal);
+		return Word(line_counter, token, Word::CONST, numVal);
 	}
 	else if (isLetter())  //Start with letter
 	{
@@ -447,10 +447,10 @@ Word WordAnalyzer::identifyWord()
 	}
 	else
 	{
-		error("Not match at line " + lineCounter);
+		error("Not match at line " + line_counter);
 	}
 
-	return Word(lineCounter, token, symbol);
+	return Word(line_counter, token, symbol);
 }
 
 bool WordAnalyzer::fileExits(std::string filename)
