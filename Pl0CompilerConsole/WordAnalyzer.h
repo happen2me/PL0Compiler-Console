@@ -11,13 +11,15 @@ class WordAnalyzer
 public:
 	WordAnalyzer();
 	WordAnalyzer(std::string filename);
+	WordAnalyzer(std::string filename, std::ostream &out);
 	~WordAnalyzer();
 	
-	void error(std::string);
+	void error(std::string, bool fatal = false);
 	void analyze();
 	std::vector<Word> getResult();
 	std::string getBuffer();
 	void printResult(std::ostream& out);
+	int getErrorCount();
 
 	static std::vector<std::string> reserved_words;
 	static std::map<std::string, Word::WordType> reserved_word_map;
@@ -32,6 +34,8 @@ private:
 	int readPtr;
 	std::vector<Word> results;
 	int line_counter;
+	std::ostream& out;
+	int errorCnt;
 
 	char getchar();
 	void clearToken();

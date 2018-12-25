@@ -4,7 +4,7 @@ var c;
 begin
     c:=a+b;
     write(c);
-end
+end;
 begin
     call add;
 	write(a);

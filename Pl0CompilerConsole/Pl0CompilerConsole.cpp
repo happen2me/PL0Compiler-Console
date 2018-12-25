@@ -4,42 +4,68 @@
 #include "pch.h"
 #include <iostream>
 #include <vector>
+#include <sstream>
 #include "WordAnalyzer.h"
 #include "GrammarAnalyzer.h"
 #include "Interpreter.h"
 using namespace std;
 
+inline bool exists_test(const std::string& name) {
+	struct stat buffer;
+	return (stat(name.c_str(), &buffer) == 0);
+}
+
 int main()
 {
-
-	try {
-		
-		WordAnalyzer wordAnalyzer("code_samples/corrected.pl0");
-		wordAnalyzer.analyze();
-		//wordAnalyzer.printResult();
-		GrammarAnalyzer grammarAnalyzer(wordAnalyzer.getResult());
-		grammarAnalyzer.runCompile();
-
-		ofstream myfile;
-		myfile.open("output/pcodes.txt");
-		grammarAnalyzer.printPcodes(myfile);
-		myfile.close();
-		grammarAnalyzer.printSymbolTable(std::cout);
-		grammarAnalyzer.printPcodes(std::cout);
-		/*int op, l, m;
-		vector<Instruction> instructions;
-		while (cin >> op >> l >> m)
-		{
-			instructions.push_back(Instruction((Instruction::InstructionType) op, l, m));
-		}
-		Interpreter interpreter(instructions);*/
-		if (!grammarAnalyzer.errorHappened()) {
-			Interpreter interpreter(grammarAnalyzer.getResults());
-			interpreter.run();
-		}
+	cout << "Running" << endl;
+	cout << "input file name (refer to code_sapmples directory)" << endl;
+	string path;
+	cin >> path;
+	path = "code_samples/" + path;
+	while (!exists_test(path))
+	{
+		cout << path << " not exits";
+		cout << "input file name (refer to code_sapmples directory)" << endl;
+		path = "code_samples/" + path;
 	}
-	catch (const std::exception e) {
-		std::cerr << e.what() << std::endl;
+
+	WordAnalyzer wordAnalyzer(path);
+	try {
+		wordAnalyzer.analyze();
+	}
+	catch (std::exception e) {
+		cout << "Word analysis failed" << endl;
+		return 0;
+	}
+
+	if (wordAnalyzer.getErrorCount() != 0) {
+		cout << wordAnalyzer.getErrorCount() << " errors detected in word analysis" << endl;
+	}
+	else{
+		GrammarAnalyzer grammarAnalyzer(wordAnalyzer.getResult());
+		try {
+			grammarAnalyzer.runCompile();
+		}
+		catch (std::exception e) {
+			std::cout << e.what() << std::endl;
+		}
+		try {
+			//wordAnalyzer.printResult();			
+			ofstream myfile;
+			myfile.open("output/pcodes.txt");
+			grammarAnalyzer.printPcodes(myfile);
+			myfile.close();
+			grammarAnalyzer.printSymbolTable(std::cout);
+			grammarAnalyzer.printPcodes(std::cout);
+			std::cout << grammarAnalyzer.getErrorCount() << " errors detected" << std::endl;
+			if (!grammarAnalyzer.errorHappened()) {
+				Interpreter interpreter(grammarAnalyzer.getResults());
+				interpreter.run();
+			}
+		}
+		catch (const std::exception e) {
+			std::cerr << e.what() << std::endl;
+		}
 	}
 
 

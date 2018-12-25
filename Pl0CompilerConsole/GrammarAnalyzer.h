@@ -17,6 +17,7 @@ public:
 	bool errorHappened();
 	void printSymbolTable(std::ostream& out);
 	void printPcodes(std::ostream& out);
+	int getErrorCount();
 
 private:
 	std::stack<Word> word_stack;
@@ -27,12 +28,12 @@ private:
 	std::vector<Instruction> pcodes;
 	int lev;
 	int error_count;
-	void emit(Instruction::InstructionType type, int l, int m);
+	void gen(Instruction::InstructionType type, int l, int m);
 
 	bool read();
 
 	void MAIN_PROC();
-	void SUB_PROC();
+	void BLOCK();
 	void STATEMENT();
 	void EXPRESSION(); //<表达式>::=[+|-]<项>{<加法运算符><项>}
 	void CONDITION();
@@ -63,6 +64,7 @@ private:
 	int find(std::string name); // return -1 if not find
 
 	int position(std::string identifier, int level);
+	int position_debug(std::string identifier, int level);
 	int getTx();
 	int getCx();
 	bool test(int line, Word::WordType word_type, Error::ErrorType error_type);

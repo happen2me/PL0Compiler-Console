@@ -7,7 +7,7 @@
 using namespace std;
 
 
-#define DEBUG 1
+#define DEBUG 0
 #define VERBOSE 0
 
 
@@ -39,7 +39,7 @@ GrammarAnalyzer::~GrammarAnalyzer()
 {
 }
 
-void GrammarAnalyzer::emit(Instruction::InstructionType type, int l, int m)
+void GrammarAnalyzer::gen(Instruction::InstructionType type, int l, int m)
 {
 	pcodes.push_back(Instruction(type, l, m));
 }
@@ -79,7 +79,7 @@ void GrammarAnalyzer::MAIN_PROC()
 {
 	lev = -1;
 	try {
-		SUB_PROC();
+		BLOCK();
 
 		if (!checkType(Word::SP_DOT)) {
 			raiseWrapper(current_word.line, Error::EXPECT_DOT_AT_END);
@@ -94,16 +94,19 @@ void GrammarAnalyzer::MAIN_PROC()
 		std::cout << "\nGrammar Analyze finished" << std::endl;
 	}
 	else {
-		std::cerr << "\nThere are still " << word_stack.size() << " words remains in statck" << std::endl;
+		std::cerr << "\nGrammar analysis failed. There are still " << word_stack.size() << " words remains in statck" << std::endl;
 		std::cerr << "cur is in line " << current_word.line + 1 << std::endl;
 	}
 }
 
 //<分程序>::=[<常量说明部分>][<变量说明部分>][<过程说明部分>]<语句>
-void GrammarAnalyzer::SUB_PROC()
+void GrammarAnalyzer::BLOCK()
 {
 	int stored_lev = lev;
 	lev += 1;
+	if (DEBUG) {
+		cout << "LEVEL changed to " << lev << " at line " << current_word.line << endl;
+	}
 
 	if (lev > MAX_NEST_LEVEL) {
 		raiseWrapper(current_word.line, Error::EXCEED_MAX_LEVEL);
@@ -113,7 +116,7 @@ void GrammarAnalyzer::SUB_PROC()
 	int stored_tx = getTx();
 	int stored_cx = getCx();
 
-	emit(Instruction::JMP, 0, 0);
+	gen(Instruction::JMP, 0, 0);
 
 	if (current_word.type == Word::KW_CONST) {
 		CONST_DECLARATION();
@@ -132,13 +135,16 @@ void GrammarAnalyzer::SUB_PROC()
 	}
 
 
-	emit(Instruction::INC, 0, dx); // space for var
+	gen(Instruction::INC, 0, dx); // space for var
 
 	STATEMENT();
 
-	emit(Instruction::OPR, 0, Instruction::OT_RET);
+	gen(Instruction::OPR, 0, Instruction::OT_RET);
 
 	lev = stored_lev;
+	if (DEBUG) {
+		cout << "LEVEL changed to " << lev << " at line " << current_word.line <<  endl;
+	}
 }
 
 //<语句>::=<赋值语句> | <条件语句> | <当循环语句> | <过程调用语句> | <复合语句> | <读语句> | <写语句> | <重复语句> | <空>
@@ -188,7 +194,7 @@ void GrammarAnalyzer::EXPRESSION()
 	}
 	TERM();
 	if (neg_start) {
-		emit(Instruction::OPR, 0, Instruction::OT_NEG);
+		gen(Instruction::OPR, 0, Instruction::OT_NEG);
 	}
 
 	while (current_word.name == "+" || current_word.name == "-")
@@ -197,10 +203,10 @@ void GrammarAnalyzer::EXPRESSION()
 		read();
 		TERM();
 		if (is_plus) {
-			emit(Instruction::OPR, 0, Instruction::OT_ADD);
+			gen(Instruction::OPR, 0, Instruction::OT_ADD);
 		}
 		else {
-			emit(Instruction::OPR, 0, Instruction::OT_SUB);
+			gen(Instruction::OPR, 0, Instruction::OT_SUB);
 		}
 	}
 }
@@ -211,7 +217,7 @@ void GrammarAnalyzer::CONDITION()
 	if (current_word.type == Word::KW_ODD) {
 		read();
 		EXPRESSION();
-		emit(Instruction::OPR, 0, Instruction::OT_ODD);
+		gen(Instruction::OPR, 0, Instruction::OT_ODD);
 	}
 	else {
 		EXPRESSION();
@@ -224,22 +230,22 @@ void GrammarAnalyzer::CONDITION()
 		switch (opr_type)
 		{
 		case Word::OP_EQUAL:
-			emit(Instruction::OPR, 0, Instruction::OT_EQL);
+			gen(Instruction::OPR, 0, Instruction::OT_EQL);
 			break;
 		case Word::OP_NOT_EQUAL:
-			emit(Instruction::OPR, 0, Instruction::OT_NEQ);
+			gen(Instruction::OPR, 0, Instruction::OT_NEQ);
 			break;
 		case Word::OP_LESS:
-			emit(Instruction::OPR, 0, Instruction::OT_LSS);
+			gen(Instruction::OPR, 0, Instruction::OT_LSS);
 			break;
 		case Word::OP_LESS_EQUAL:
-			emit(Instruction::OPR, 0, Instruction::OT_LEQ);
+			gen(Instruction::OPR, 0, Instruction::OT_LEQ);
 			break;
 		case Word::OP_ABOVE:
-			emit(Instruction::OPR, 0, Instruction::OT_GTR);
+			gen(Instruction::OPR, 0, Instruction::OT_GTR);
 			break;
 		case Word::OP_ABOVE_EQUAL:
-			emit(Instruction::OPR, 0, Instruction::OT_GEQ);
+			gen(Instruction::OPR, 0, Instruction::OT_GEQ);
 			break;
 		default:
 			if (!current_word.isRetionalOperator()) {
@@ -264,13 +270,16 @@ void GrammarAnalyzer::FACTOR()
 
 		if (pos == NOT_FOUND) {
 			raiseWrapper(current_word.line, Error::UNDECLARED_IDENTIFIER);
+			if (DEBUG) {
+				std::cout << "\t " << current_word.name << " not found\n";
+			}
 		}
 		else {
 			if (table[pos].type == Symbol::CONST) {
-				emit(Instruction::LIT, 0, table[pos].val);
+				gen(Instruction::LIT, 0, table[pos].val);
 			}
 			else if (table[pos].type == Symbol::VAR) {
-				emit(Instruction::LOD, lev - table[pos].level, table[pos].address);
+				gen(Instruction::LOD, lev - table[pos].level, table[pos].address);
 			}
 			else {
 				raiseWrapper(current_word.line, Error::EXPRESSION_CANNOT_CONTAIN_PROC);
@@ -281,7 +290,7 @@ void GrammarAnalyzer::FACTOR()
 	}
 	else if (current_word.type == Word::CONST) {
 
-		emit(Instruction::LIT, 0, current_word.val);
+		gen(Instruction::LIT, 0, current_word.val);
 
 		read();
 
@@ -307,10 +316,10 @@ void GrammarAnalyzer::TERM()
 		FACTOR();
 
 		if (is_multiply) {
-			emit(Instruction::OPR, 0, Instruction::OT_MUL);
+			gen(Instruction::OPR, 0, Instruction::OT_MUL);
 		}
 		else {
-			emit(Instruction::OPR, 0, Instruction::OT_DIV);
+			gen(Instruction::OPR, 0, Instruction::OT_DIV);
 		}
 	}
 }
@@ -410,7 +419,7 @@ void GrammarAnalyzer::PROCEDURE_DECLARATION()
 		raiseWrapper(current_word.line, Error::MISSING_COMMA_OR_SEMICOLON);
 	}
 
-	SUB_PROC();
+	BLOCK();
 
 	if (checkType(Word::SP_SEMICOLON)) {
 		read();
@@ -460,7 +469,7 @@ void GrammarAnalyzer::ASSIGNMENT_STATEMENT()
 
 	EXPRESSION();
 	if (pos != NOT_FOUND && table[pos].type == Symbol::VAR) {
-		emit(Instruction::STO, lev - table[pos].level, table[pos].address);
+		gen(Instruction::STO, lev - table[pos].level, table[pos].address);
 	}
 }
 
@@ -498,7 +507,7 @@ void GrammarAnalyzer::CONDITIONAL_STATEMENT()
 
 	int jpc_cx = getCx();
 
-	emit(Instruction::JPC, 0, 0);
+	gen(Instruction::JPC, 0, 0);
 
 	STATEMENT();
 	if (!current_word.isEmptyWord() && current_word.type == Word::KW_ELSE) {
@@ -508,7 +517,7 @@ void GrammarAnalyzer::CONDITIONAL_STATEMENT()
 
 		jpc_cx = getCx(); // change to jmp_cx
 
-		emit(Instruction::JMP, 0, 0);
+		gen(Instruction::JMP, 0, 0);
 
 		STATEMENT();
 	}
@@ -526,7 +535,7 @@ void GrammarAnalyzer::WHILE_STATEMENT()
 
 	int jpc_cx = getCx();
 
-	emit(Instruction::JPC, 0, 0);
+	gen(Instruction::JPC, 0, 0);
 
 	//confirm(Word::KW_DO);
 	test(current_word.line, Word::KW_DO, Error::EXPECT_DO);
@@ -537,7 +546,7 @@ void GrammarAnalyzer::WHILE_STATEMENT()
 
 	STATEMENT();
 
-	emit(Instruction::JMP, 0, condition_cx);
+	gen(Instruction::JMP, 0, condition_cx);
 	pcodes[jpc_cx].m = getCx(); // points to code after statement
 }
 
@@ -557,7 +566,7 @@ void GrammarAnalyzer::CALL_STATEMENT()
 			raiseWrapper(current_word.line, Error::UNDECLARED_IDENTIFIER);
 		}
 		else if (table[pos].type == Symbol::PROC) {
-			emit(Instruction::CALL, lev - table[pos].level, table[pos].address);
+			gen(Instruction::CALL, lev - table[pos].level, table[pos].address);
 		}
 		else {
 			raiseWrapper(current_word.line, Error::CANNOT_CALL_VAR_OR_CONST);
@@ -585,7 +594,7 @@ void GrammarAnalyzer::READ_STATEMENT()
 
 	while (checkType(Word::IDENTIFIER))
 	{
-		emit(Instruction::RED, 0, 0); //读取元素置于栈顶
+		gen(Instruction::RED, 0, 0); //读取元素置于栈顶
 
 		int pos = position(current_word.name, lev);
 
@@ -596,7 +605,7 @@ void GrammarAnalyzer::READ_STATEMENT()
 			raiseWrapper(current_word.line, Error::ASSIGNED_TO_CONST_OR_PROC);
 		}
 		else {
-			emit(Instruction::STO, lev - table[pos].level, table[pos].address); //把栈顶元素写入指定位置
+			gen(Instruction::STO, lev - table[pos].level, table[pos].address); //把栈顶元素写入指定位置
 		}
 
 		read();
@@ -620,11 +629,11 @@ void GrammarAnalyzer::WRITE_STATEMENT()
 	confirmName("(");
 	read();
 	EXPRESSION();
-	emit(Instruction::WRT, 0, 1);
+	gen(Instruction::WRT, 0, 1);
 	while (current_word.name == ",") {
 		read();
 		EXPRESSION();
-		emit(Instruction::WRT, 0, 1);
+		gen(Instruction::WRT, 0, 1);
 	}
 	confirmName(")");
 	read();
@@ -648,7 +657,7 @@ void GrammarAnalyzer::REPEAT_STATEMENT()
 	read();
 	CONDITION();
 
-	emit(Instruction::JPC, 0, statemetn_cx);
+	gen(Instruction::JPC, 0, statemetn_cx);
 
 }
 
@@ -754,8 +763,24 @@ void GrammarAnalyzer::printPcodes(std::ostream& out)
 	}
 }
 
+int GrammarAnalyzer::getErrorCount()
+{
+	return error_count;
+}
+
 int GrammarAnalyzer::position(std::string identifier, int level)
 {
+	for (int i = table.size() - 1; i >= 0; i--) {
+		if (table[i].name == identifier && table[i].level <= level) {
+			return i;
+		}
+	}
+	return -1;
+}
+
+int GrammarAnalyzer::position_debug(std::string identifier, int level)
+{
+	std::cout << "ID:  " << identifier << "; LEVEL: " << level << std::endl;
 	for (int i = table.size() - 1; i >= 0; i--) {
 		if (table[i].name == identifier && table[i].level <= level) {
 			return i;
@@ -782,7 +807,7 @@ bool GrammarAnalyzer::test(int line, Word::WordType word_type, Error::ErrorType 
 	}
 	else {
 		raiseWrapper(line, error_type);
-		std::cout << "\t " << Word::translator[word_type] << " expected" << std::endl;
+		//std::cout << "\t " << Word::translator[word_type] << " expected" << std::endl;
 		return false;
 	}
 }
@@ -791,13 +816,16 @@ void GrammarAnalyzer::raiseWrapper(int line, Error::ErrorType errorType)
 {
 	error_count++;
 	Error::raise(line, errorType);
+	if (errorType == Error::UNDECLARED_IDENTIFIER) {
+		std::cout << "undeclared identifier " << current_word.name << std::endl;
+	}
 }
 
 void GrammarAnalyzer::raiseWrapper(int line, Error::ErrorType errorType, std::string expectation)
 {
 	error_count++;
 	Error::raise(line, errorType);
-	std::cerr << "\t" << current_word.name << " read, expect " << expectation << std::endl;
+	std::cerr << current_word.name << " read, expect " << expectation << std::endl;
 }
 
 bool GrammarAnalyzer::errorHappened()
